@@ -49,7 +49,6 @@ import com.example.data.TransactionEntity
 import com.example.logic.CurrencyFormatter
 import com.example.model.DayLimitCalculation
 import com.example.model.UPIApp
-import com.example.ui.components.MonthDaysCalendarCard
 import com.example.ui.components.UpiBadge
 import com.example.ui.theme.GlassBorderGradient
 import com.example.ui.theme.GlassCardBackground
@@ -133,14 +132,6 @@ fun HistoryScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            item {
-                MonthDaysCalendarCard(
-                    currentDate = currentDate,
-                    calculation = calculation,
-                    monthTransactions = monthTransactions
-                )
-            }
-
             if (dailySummaries.isEmpty()) {
                 item {
                     Card(
