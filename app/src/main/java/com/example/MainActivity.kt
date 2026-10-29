@@ -222,6 +222,8 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
                         onSelectTransaction = { tx -> editingTransaction = tx },
                         onDismissRollover = { viewModel.dismissMonthRollover() },
                         onOpenSettings = { currentTab = ScreenTab.SETTINGS },
+                        onAddUpiApp = { viewModel.addIntegratedUpiApp(it) },
+                        onRemoveUpiApp = { viewModel.removeIntegratedUpiApp(it) },
                         onAutoTrackSpend = { amount, merchant, upiApp, category ->
                             viewModel.forceSaveTransaction(
                                 amount = amount,
@@ -267,7 +269,15 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
                         },
                         onExportCsv = { viewModel.generateCsv() },
                         onResetMonth = { viewModel.clearCurrentMonthData() },
-                        onResetAll = { viewModel.resetAllData() }
+                        onResetAll = { viewModel.resetAllData() },
+                        onAddUpiApp = { viewModel.addIntegratedUpiApp(it) },
+                        onRemoveUpiApp = { viewModel.removeIntegratedUpiApp(it) },
+                        onUpdateProfile = { name, phone, email ->
+                            viewModel.updateProfile(name, phone, email)
+                        },
+                        onLogout = {
+                            viewModel.logout()
+                        }
                     )
                 }
             }

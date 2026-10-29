@@ -190,7 +190,7 @@ fun MonthDaysCalendarCard(
                             color = Color.White
                         )
                         Text(
-                            text = "Daily Limit & Remaining Balance",
+                            text = "Daily Spends & Limit Status",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFF9CA3AF)
                         )
@@ -263,20 +263,10 @@ fun MonthDaysCalendarCard(
 
                                 val balanceDisplay = when {
                                     isToday -> {
-                                        if (calculation.isOverToday) {
-                                            "-${CurrencyFormatter.formatCompact(calculation.overspendTodayAmount)}"
-                                        } else {
-                                            CurrencyFormatter.formatCompact(calculation.remainingToday)
-                                        }
+                                        CurrencyFormatter.formatCompact(calculation.spentToday)
                                     }
                                     isCompleted -> {
-                                        if (remainingBal > 0.01) {
-                                            "+${CurrencyFormatter.formatCompact(remainingBal)}"
-                                        } else if (remainingBal < -0.01) {
-                                            "-${CurrencyFormatter.formatCompact(-remainingBal)}"
-                                        } else {
-                                            "₹0"
-                                        }
+                                        CurrencyFormatter.formatCompact(dayInfo?.spentForDay ?: 0.0)
                                     }
                                     else -> {
                                         CurrencyFormatter.formatCompact(limitForDay)

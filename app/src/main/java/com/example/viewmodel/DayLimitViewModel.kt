@@ -430,6 +430,16 @@ class DayLimitViewModel(application: Application) : AndroidViewModel(application
         emitToast("Monthly budget updated to ${CurrencyFormatter.format(newBudget)}")
     }
 
+    fun addIntegratedUpiApp(appTag: String) {
+        userPrefs.addIntegratedUpiApp(appTag)
+        emitToast("Integrated $appTag for automatic tracking")
+    }
+
+    fun removeIntegratedUpiApp(appTag: String) {
+        userPrefs.removeIntegratedUpiApp(appTag)
+        emitToast("Removed $appTag from auto-tracking")
+    }
+
     fun dismissMonthRollover() {
         val ym = _currentDate.value.format(DateTimeFormatter.ofPattern("yyyy-MM"))
         userPrefs.acknowledgeMonthRollover(ym)
@@ -465,6 +475,16 @@ class DayLimitViewModel(application: Application) : AndroidViewModel(application
             sb.append("${tx.id},$dateInstant,${tx.amount},\"$cleanMerchant\",${tx.upiApp},${tx.category},\"$cleanNote\"\n")
         }
         return sb.toString()
+    }
+
+    fun updateProfile(name: String, phone: String, email: String) {
+        userPrefs.updateProfile(name, phone, email)
+        emitToast("Profile details updated")
+    }
+
+    fun logout() {
+        userPrefs.logout()
+        emitToast("Logged out successfully")
     }
 
     private fun emitToast(msg: String) {

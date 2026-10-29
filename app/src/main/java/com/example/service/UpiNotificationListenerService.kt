@@ -78,6 +78,18 @@ class UpiNotificationListenerService : NotificationListenerService() {
                 }
             }
 
+            // Only track if the user has manually integrated this UPI app
+            val userPrefs = com.example.data.UserPreferences(applicationContext)
+            val integratedApps = userPrefs.settings.value.integratedUpiApps
+            val isIntegrated = integratedApps.contains(inferredUpi.name) ||
+                    integratedApps.contains(inferredUpi.brandTag.uppercase()) ||
+                    integratedApps.contains(inferredUpi.displayName.uppercase())
+
+            if (!isIntegrated) {
+                // Ignore transactions from non-integrated UPI apps
+                return
+            }
+
             processAutoDetectedDebit(
                 amount = parsed.amount,
                 merchant = parsed.merchant ?: "UPI Payment",

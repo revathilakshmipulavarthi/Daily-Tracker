@@ -83,6 +83,8 @@ fun HomeScreen(
     onSelectTransaction: (TransactionEntity) -> Unit,
     onDismissRollover: () -> Unit,
     onOpenSettings: () -> Unit,
+    onAddUpiApp: (String) -> Unit = {},
+    onRemoveUpiApp: (String) -> Unit = {},
     onAutoTrackSpend: (Double, String, UPIApp, Category) -> Unit = { _, _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
@@ -352,9 +354,12 @@ fun HomeScreen(
                 }
             }
 
-            // Automatic UPI Tracking Hub
+            // Manual UPI Integration & Tracking Hub
             item {
                 AutoUpiSyncCard(
+                    integratedUpiApps = userSettings.integratedUpiApps,
+                    onAddUpiApp = onAddUpiApp,
+                    onRemoveUpiApp = onRemoveUpiApp,
                     onSimulateTestPayment = { amount, merchant, upiApp, category ->
                         onAutoTrackSpend(amount, merchant, upiApp, category)
                     }
