@@ -354,16 +354,19 @@ fun HomeScreen(
                 }
             }
 
-            // Manual UPI Integration & Tracking Hub
-            item {
-                AutoUpiSyncCard(
-                    integratedUpiApps = userSettings.integratedUpiApps,
-                    onAddUpiApp = onAddUpiApp,
-                    onRemoveUpiApp = onRemoveUpiApp,
-                    onSimulateTestPayment = { amount, merchant, upiApp, category ->
-                        onAutoTrackSpend(amount, merchant, upiApp, category)
-                    }
-                )
+            // UPI Integration Hub: Displayed on Home only when no UPI apps are connected yet.
+            // Once connected, this section disappears from the Home screen and is managed exclusively in Settings.
+            if (userSettings.integratedUpiApps.isEmpty()) {
+                item {
+                    AutoUpiSyncCard(
+                        integratedUpiApps = userSettings.integratedUpiApps,
+                        onAddUpiApp = onAddUpiApp,
+                        onRemoveUpiApp = onRemoveUpiApp,
+                        onSimulateTestPayment = { amount, merchant, upiApp, category ->
+                            onAutoTrackSpend(amount, merchant, upiApp, category)
+                        }
+                    )
+                }
             }
 
             // Month Days Calendar: Glassmorphism with Green Stroke (within limit) & Red Stroke (excess limit)

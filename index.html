@@ -642,8 +642,8 @@
           </div>
         </div>
 
-        <!-- UPI Integration & Tracking Hub -->
-        <div class="glass-card">
+        <!-- UPI Integration & Tracking Hub (Hidden once apps are integrated; managed in Settings) -->
+        <div class="glass-card" id="homeUpiCard">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
               <div style="font-size:15px; font-weight:700;">UPI Integration</div>
@@ -1184,9 +1184,16 @@
     }
 
     function renderIntegratedUpiList() {
+      const homeUpiCard = document.getElementById('homeUpiCard');
+      if (homeUpiCard) {
+        // Once integrated with UPI app, home page integrate section disappears and shows only in settings page
+        homeUpiCard.style.display = integratedUpiApps.length > 0 ? 'none' : 'block';
+      }
+
       const container = document.getElementById('integratedUpiList');
+      if (!container) return;
       const countLabel = document.getElementById('integratedCountLabel');
-      countLabel.innerText = `${integratedUpiApps.length} Apps Connected`;
+      if (countLabel) countLabel.innerText = `${integratedUpiApps.length} Apps Connected`;
 
       if (integratedUpiApps.length === 0) {
         container.innerHTML = `
