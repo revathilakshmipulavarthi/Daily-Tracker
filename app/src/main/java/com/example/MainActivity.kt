@@ -178,7 +178,10 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
                             onClick = { currentTab = ScreenTab.HOME },
                             icon = {
                                 Icon(
-                                    imageVector = if (currentTab == ScreenTab.HOME) Icons.Filled.Home else Icons.Outlined.Home,
+                                    painter = painterResource(
+                                        if (currentTab == ScreenTab.HOME) R.drawable.ic_nav_home_filled
+                                        else R.drawable.ic_nav_home
+                                    ),
                                     contentDescription = "Home",
                                     tint = if (currentTab == ScreenTab.HOME) Color.White else Color(0xB3FFFFFF)
                                 )
@@ -191,7 +194,10 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
                             onClick = { currentTab = ScreenTab.HISTORY },
                             icon = {
                                 Icon(
-                                    imageVector = if (currentTab == ScreenTab.HISTORY) Icons.Filled.History else Icons.Outlined.History,
+                                    painter = painterResource(
+                                        if (currentTab == ScreenTab.HISTORY) R.drawable.ic_nav_history_filled
+                                        else R.drawable.ic_nav_history
+                                    ),
                                     contentDescription = "History",
                                     tint = if (currentTab == ScreenTab.HISTORY) Color.White else Color(0xB3FFFFFF)
                                 )
@@ -204,7 +210,10 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
                             onClick = { currentTab = ScreenTab.INSIGHTS },
                             icon = {
                                 Icon(
-                                    imageVector = if (currentTab == ScreenTab.INSIGHTS) Icons.Filled.BarChart else Icons.Outlined.BarChart,
+                                    painter = painterResource(
+                                        if (currentTab == ScreenTab.INSIGHTS) R.drawable.ic_nav_insights_filled
+                                        else R.drawable.ic_nav_insights
+                                    ),
                                     contentDescription = "Insights",
                                     tint = if (currentTab == ScreenTab.INSIGHTS) Color.White else Color(0xB3FFFFFF)
                                 )
@@ -217,7 +226,10 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
                             onClick = { currentTab = ScreenTab.SETTINGS },
                             icon = {
                                 Icon(
-                                    imageVector = if (currentTab == ScreenTab.SETTINGS) Icons.Filled.Settings else Icons.Outlined.Settings,
+                                    painter = painterResource(
+                                        if (currentTab == ScreenTab.SETTINGS) R.drawable.ic_nav_settings_filled
+                                        else R.drawable.ic_nav_settings
+                                    ),
                                     contentDescription = "Settings",
                                     tint = if (currentTab == ScreenTab.SETTINGS) Color.White else Color(0xB3FFFFFF)
                                 )
