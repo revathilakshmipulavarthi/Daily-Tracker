@@ -455,19 +455,19 @@
     @media (max-width: 480px) { .fab-btn { right: 20px; } }
     .fab-btn:active { transform: scale(0.92); }
 
-    /* Bottom Navigation Bar */
+    /* Bottom Navigation Bar (Material 3 Style) */
     nav.bottom-nav {
       position: fixed;
       bottom: 0;
       width: 100%;
       max-width: 480px;
-      background: rgba(12, 12, 16, 0.95);
+      background: #0C0C10;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      padding: 10px 4px 18px;
+      padding: 8px 4px 16px;
       z-index: 40;
     }
 
@@ -478,13 +478,32 @@
       gap: 4px;
       color: #8E8E9B;
       text-decoration: none;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 500;
       cursor: pointer;
       border: none;
       background: none;
-      padding: 6px;
+      padding: 0;
       transition: color 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
+    .nav-indicator {
+      width: 64px;
+      height: 32px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
+      color: #8E8E9B;
+    }
+
+    .nav-item.active .nav-indicator {
+      background: #262632;
+      color: #FFFFFF;
     }
 
     .nav-item.active {
@@ -492,8 +511,34 @@
       font-weight: 700;
     }
 
-    .nav-icon { font-size: 18px; pointer-events: none; }
-    .nav-label { pointer-events: none; }
+    .nav-icon {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      color: inherit;
+    }
+
+    .nav-icon svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+      fill: currentColor;
+    }
+
+    .nav-icon-filled { display: none; }
+    .nav-icon-outline { display: flex; }
+    .nav-item.active .nav-icon-filled { display: flex; }
+    .nav-item.active .nav-icon-outline { display: none; }
+
+    .nav-label {
+      pointer-events: none;
+      font-size: 12px;
+      line-height: 14px;
+      letter-spacing: 0.15px;
+    }
 
     /* Insights Bar Chart */
     .bar-chart-container {
@@ -936,22 +981,50 @@
     <!-- Floating Action Button (+) -->
     <button class="fab-btn" onclick="openAddModal()" aria-label="Add spend">+</button>
 
-    <!-- Bottom Navigation Bar with deep linking & data-tabs -->
+    <!-- Bottom Navigation Bar with deep linking & data-tabs (Material 3 Style) -->
     <nav class="bottom-nav">
       <button class="nav-item active" data-tab="home" onclick="handleNavClick('home')">
-        <span class="nav-icon">🏠</span>
+        <span class="nav-indicator">
+          <span class="nav-icon nav-icon-filled">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          </span>
+          <span class="nav-icon nav-icon-outline">
+            <svg viewBox="0 0 24 24"><path d="m12 5.69 5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+          </span>
+        </span>
         <span class="nav-label">Home</span>
       </button>
       <button class="nav-item" data-tab="history" onclick="handleNavClick('history')">
-        <span class="nav-icon">🕒</span>
+        <span class="nav-indicator">
+          <span class="nav-icon nav-icon-filled">
+            <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+          </span>
+          <span class="nav-icon nav-icon-outline">
+            <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+          </span>
+        </span>
         <span class="nav-label">History</span>
       </button>
       <button class="nav-item" data-tab="insights" onclick="handleNavClick('insights')">
-        <span class="nav-icon">📊</span>
+        <span class="nav-indicator">
+          <span class="nav-icon nav-icon-filled">
+            <svg viewBox="0 0 24 24"><rect x="5" y="10" width="3.2" height="9" rx="1.2"/><rect x="10.4" y="5" width="3.2" height="14" rx="1.2"/><rect x="15.8" y="12" width="3.2" height="7" rx="1.2"/></svg>
+          </span>
+          <span class="nav-icon nav-icon-outline">
+            <svg viewBox="0 0 24 24"><rect x="5" y="10" width="3.2" height="9" rx="1.2"/><rect x="10.4" y="5" width="3.2" height="14" rx="1.2"/><rect x="15.8" y="12" width="3.2" height="7" rx="1.2"/></svg>
+          </span>
+        </span>
         <span class="nav-label">Insights</span>
       </button>
       <button class="nav-item" data-tab="settings" onclick="handleNavClick('settings')">
-        <span class="nav-icon">⚙️</span>
+        <span class="nav-indicator">
+          <span class="nav-icon nav-icon-filled">
+            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          </span>
+          <span class="nav-icon nav-icon-outline">
+            <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-1.98-1.71c.08.49.08.97 0 1.46l-.16 1.03.82.64 1.01.79-.67 1.16-1.19-.48-.96-.39-.77.62c-.41.33-.86.58-1.35.75l-.99.34-.15 1.02-.19 1.28h-1.34l-.19-1.28-.15-1.02-.99-.34c-.49-.17-.94-.42-1.35-.75l-.77-.62-.96.39-1.19.48-.67-1.16 1.01-.79.82-.64-.16-1.03c-.08-.49-.08-.97 0-1.46l.16-1.03-.82-.64-1.01-.79.67-1.16 1.19.48.96.39.77-.62c.41-.33.86-.58 1.35-.75l.99-.34.15-1.02.19-1.28h1.34l.19 1.28.15 1.02.99.34c.49.17.94.42 1.35.75l.77.62.96-.39 1.19-.48.67 1.16-1.01.79-.82.64.16 1.03zM12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
+          </span>
+        </span>
         <span class="nav-label">Settings</span>
       </button>
     </nav>
