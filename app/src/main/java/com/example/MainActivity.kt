@@ -20,16 +20,28 @@ import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -137,74 +149,82 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            androidx.compose.material3.NavigationBar(
-                modifier = Modifier.testTag("bottom_nav_bar"),
-                containerColor = androidx.compose.ui.graphics.Color(0xFF0C0C10),
-                tonalElevation = 0.dp
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 20.dp),
+                contentAlignment = Alignment.Center
             ) {
-                val navItemColors = androidx.compose.material3.NavigationBarItemDefaults.colors(
-                    selectedIconColor = androidx.compose.ui.graphics.Color.White,
-                    selectedTextColor = androidx.compose.ui.graphics.Color.White,
-                    indicatorColor = androidx.compose.ui.graphics.Color(0xFF262632),
-                    unselectedIconColor = androidx.compose.ui.graphics.Color(0xFF8E8E9B),
-                    unselectedTextColor = androidx.compose.ui.graphics.Color(0xFF8E8E9B)
-                )
-
-                NavigationBarItem(
-                    selected = currentTab == ScreenTab.HOME,
-                    onClick = { currentTab = ScreenTab.HOME },
-                    icon = {
-                        Icon(
-                            imageVector = if (currentTab == ScreenTab.HOME) Icons.Filled.Home else Icons.Outlined.Home,
-                            contentDescription = "Home"
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(66.dp)
+                        .testTag("bottom_nav_bar"),
+                    shape = RoundedCornerShape(percent = 50),
+                    color = Color(0x99141822),
+                    border = BorderStroke(1.dp, Color(0x33FFFFFF)),
+                    shadowElevation = 16.dp
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        CapsuleNavItem(
+                            selected = currentTab == ScreenTab.HOME,
+                            onClick = { currentTab = ScreenTab.HOME },
+                            icon = {
+                                Icon(
+                                    imageVector = if (currentTab == ScreenTab.HOME) Icons.Filled.Home else Icons.Outlined.Home,
+                                    contentDescription = "Home",
+                                    tint = if (currentTab == ScreenTab.HOME) Color.White else Color(0xB3FFFFFF)
+                                )
+                            },
+                            modifier = Modifier.testTag("nav_tab_home")
                         )
-                    },
-                    label = { Text("Home") },
-                    colors = navItemColors,
-                    modifier = Modifier.testTag("nav_tab_home")
-                )
 
-                NavigationBarItem(
-                    selected = currentTab == ScreenTab.HISTORY,
-                    onClick = { currentTab = ScreenTab.HISTORY },
-                    icon = {
-                        Icon(
-                            imageVector = if (currentTab == ScreenTab.HISTORY) Icons.Filled.History else Icons.Outlined.History,
-                            contentDescription = "History"
+                        CapsuleNavItem(
+                            selected = currentTab == ScreenTab.HISTORY,
+                            onClick = { currentTab = ScreenTab.HISTORY },
+                            icon = {
+                                Icon(
+                                    imageVector = if (currentTab == ScreenTab.HISTORY) Icons.Filled.History else Icons.Outlined.History,
+                                    contentDescription = "History",
+                                    tint = if (currentTab == ScreenTab.HISTORY) Color.White else Color(0xB3FFFFFF)
+                                )
+                            },
+                            modifier = Modifier.testTag("nav_tab_history")
                         )
-                    },
-                    label = { Text("History") },
-                    colors = navItemColors,
-                    modifier = Modifier.testTag("nav_tab_history")
-                )
 
-                NavigationBarItem(
-                    selected = currentTab == ScreenTab.INSIGHTS,
-                    onClick = { currentTab = ScreenTab.INSIGHTS },
-                    icon = {
-                        Icon(
-                            imageVector = if (currentTab == ScreenTab.INSIGHTS) Icons.Filled.BarChart else Icons.Outlined.BarChart,
-                            contentDescription = "Insights"
+                        CapsuleNavItem(
+                            selected = currentTab == ScreenTab.INSIGHTS,
+                            onClick = { currentTab = ScreenTab.INSIGHTS },
+                            icon = {
+                                Icon(
+                                    imageVector = if (currentTab == ScreenTab.INSIGHTS) Icons.Filled.BarChart else Icons.Outlined.BarChart,
+                                    contentDescription = "Insights",
+                                    tint = if (currentTab == ScreenTab.INSIGHTS) Color.White else Color(0xB3FFFFFF)
+                                )
+                            },
+                            modifier = Modifier.testTag("nav_tab_insights")
                         )
-                    },
-                    label = { Text("Insights") },
-                    colors = navItemColors,
-                    modifier = Modifier.testTag("nav_tab_insights")
-                )
 
-                NavigationBarItem(
-                    selected = currentTab == ScreenTab.SETTINGS,
-                    onClick = { currentTab = ScreenTab.SETTINGS },
-                    icon = {
-                        Icon(
-                            imageVector = if (currentTab == ScreenTab.SETTINGS) Icons.Filled.Settings else Icons.Outlined.Settings,
-                            contentDescription = "Settings"
+                        CapsuleNavItem(
+                            selected = currentTab == ScreenTab.SETTINGS,
+                            onClick = { currentTab = ScreenTab.SETTINGS },
+                            icon = {
+                                Icon(
+                                    imageVector = if (currentTab == ScreenTab.SETTINGS) Icons.Filled.Settings else Icons.Outlined.Settings,
+                                    contentDescription = "Settings",
+                                    tint = if (currentTab == ScreenTab.SETTINGS) Color.White else Color(0xB3FFFFFF)
+                                )
+                            },
+                            modifier = Modifier.testTag("nav_tab_settings")
                         )
-                    },
-                    label = { Text("Settings") },
-                    colors = navItemColors,
-                    modifier = Modifier.testTag("nav_tab_settings")
-                )
+                    }
+                }
             }
         }
     ) { innerPadding ->
@@ -349,3 +369,39 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
         )
     }
 }
+
+@Composable
+private fun RowScope.CapsuleNavItem(
+    selected: Boolean,
+    onClick: () -> Unit,
+    icon: @Composable () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .weight(1f)
+            .fillMaxHeight()
+            .clip(RoundedCornerShape(percent = 50))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        if (selected) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(72.dp),
+                shape = RoundedCornerShape(percent = 50),
+                color = Color(0x33FFFFFF),
+                border = BorderStroke(1.dp, Color(0x44FFFFFF)),
+                shadowElevation = 4.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    icon()
+                }
+            }
+        } else {
+            icon()
+        }
+    }
+}
+
