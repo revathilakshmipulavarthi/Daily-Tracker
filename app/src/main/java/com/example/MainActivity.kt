@@ -42,6 +42,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -389,10 +390,10 @@ private fun RowScope.CapsuleNavItem(
             Surface(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .width(72.dp),
+                    .fillMaxWidth(0.92f),
                 shape = RoundedCornerShape(percent = 50),
-                color = Color(0x33FFFFFF),
-                border = BorderStroke(1.dp, Color(0x44FFFFFF)),
+                color = Color(0x38FFFFFF),
+                border = BorderStroke(1.dp, Color(0x55FFFFFF)),
                 shadowElevation = 4.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
