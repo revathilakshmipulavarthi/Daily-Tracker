@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=./">
+  <title>Redirecting to DayLimit...</title>
+  <script>
+    // GitHub Pages SPA redirect: convert subpath (e.g. /history, /settings) to hash (#history, #settings)
+    (function() {
+      var pathname = window.location.pathname;
+      var segments = pathname.split('/').filter(Boolean);
+      var lastSegment = segments[segments.length - 1] || '';
+      var validTabs = ['home', 'history', 'insights', 'settings'];
+      
+      var targetHash = '';
+      if (validTabs.indexOf(lastSegment.toLowerCase()) !== -1) {
+        targetHash = '#' + lastSegment.toLowerCase();
+      }
+      
+      // Compute relative base path
+      var repoPath = window.location.pathname.replace(new RegExp('/(' + validTabs.join('|') + ')/?$'), '/');
+      window.location.replace(repoPath + targetHash);
+    })();
+  </script>
+</head>
+<body style="background:#000000; color:#FFFFFF; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;">
+  <div style="text-align:center;">
+    <p>Loading DayLimit...</p>
+    <p style="font-size:12px; color:#9CA3AF;"><a href="./" style="color:#22C55E;">Click here if not redirected automatically</a></p>
+  </div>
+</body>
+</html>

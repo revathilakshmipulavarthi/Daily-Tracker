@@ -1,0 +1,16 @@
+{
+  "name": "DayLimit - Daily Spend Tracker",
+  "short_name": "DayLimit",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "description": "Daily spend tracker and dynamic limit rebalancing for Indian UPI users",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%2314141B'/><circle cx='96' cy='96' r='60' fill='none' stroke='%2322C55E' stroke-width='8'/><text x='96' y='116' font-size='64' font-weight='bold' fill='%23FFFFFF' text-anchor='middle'>₹</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,0 +1,2078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="DayLimit - Daily Spend Tracker with Dynamic Rebalancing for UPI users">
+  <title>DayLimit - Daily Spend Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%2314141B' stroke='%2322C55E' stroke-width='4'/><text x='50' y='62' font-size='40' font-weight='bold' fill='%23FFFFFF' text-anchor='middle'>₹</text></svg>">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #000000;
+      color: #FFFFFF;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      overflow-x: hidden;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .app-viewport {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background: #000000;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Glassmorphic Styles */
+    .glass-card {
+      background: rgba(20, 20, 27, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 22px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-card-elevated {
+      background: rgba(30, 30, 42, 0.78);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 20px;
+    }
+
+    header {
+      padding: 16px 20px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .app-icon-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #22C55E;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .pill-badge {
+      background: rgba(42, 42, 54, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #D1D5DB;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      padding: 0 16px 95px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .screen-view {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .screen-view.active {
+      display: flex;
+    }
+
+    /* Hero Circle Card */
+    .hero-card {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 22px 16px;
+    }
+
+    .progress-circle-wrap {
+      position: relative;
+      width: 170px;
+      height: 170px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .progress-svg {
+      width: 170px;
+      height: 170px;
+      transform: rotate(-90deg);
+    }
+
+    .progress-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 12;
+    }
+
+    .progress-bar {
+      fill: none;
+      stroke: #22C55E;
+      stroke-width: 12;
+      stroke-linecap: round;
+      stroke-dasharray: 440;
+      stroke-dashoffset: 440;
+      transition: stroke-dashoffset 0.8s ease, stroke 0.3s ease;
+    }
+
+    .circle-inner-content {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .circle-label {
+      font-size: 11px;
+      color: #9CA3AF;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+    }
+
+    .circle-spent-amount {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .circle-limit-tag {
+      font-size: 12px;
+      color: #9CA3AF;
+      margin-top: 2px;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      width: 100%;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 10px 6px;
+      text-align: center;
+    }
+
+    .stat-pill-label {
+      font-size: 11px;
+      color: #9CA3AF;
+      margin-bottom: 2px;
+    }
+
+    .stat-pill-val {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* Calendar Card */
+    .calendar-card {
+      padding: 18px 14px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 0 4px;
+    }
+
+    .cal-title-block {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cal-month-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .cal-weekday-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #9CA3AF;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .cal-cell {
+      aspect-ratio: 0.85;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s ease;
+      user-select: none;
+    }
+
+    .cal-cell:active { transform: scale(0.94); }
+    .cal-cell-empty { background: transparent; border: none; cursor: default; }
+
+    /* Completed day within limit: Green stroke */
+    .cal-cell.completed-within {
+      background: rgba(34, 197, 94, 0.14);
+      border: 1.5px solid #22C55E;
+    }
+    .cal-cell.completed-within .day-num { color: #FFFFFF; font-weight: 600; }
+    .cal-cell.completed-within .day-amt { color: #22C55E; font-weight: 600; }
+
+    /* Completed day excess limit: Red stroke */
+    .cal-cell.completed-excess {
+      background: rgba(239, 68, 68, 0.16);
+      border: 1.5px solid #EF4444;
+    }
+    .cal-cell.completed-excess .day-num { color: #FFFFFF; font-weight: 600; }
+    .cal-cell.completed-excess .day-amt { color: #EF4444; font-weight: 600; }
+
+    /* Today: Active tracked day */
+    .cal-cell.today-within {
+      background: rgba(34, 197, 94, 0.18);
+      border: 2px solid #22C55E;
+    }
+    .cal-cell.today-within .day-num { color: #FFFFFF; font-weight: 800; }
+    .cal-cell.today-within .day-amt { color: #22C55E; font-weight: 800; }
+
+    .cal-cell.today-excess {
+      background: rgba(239, 68, 68, 0.20);
+      border: 2px solid #EF4444;
+    }
+    .cal-cell.today-excess .day-num { color: #FFFFFF; font-weight: 800; }
+    .cal-cell.today-excess .day-amt { color: #EF4444; font-weight: 800; }
+
+    /* Remaining day: Dark Gray stroke */
+    .cal-cell.remaining-day {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .cal-cell.remaining-day .day-num { color: #9CA3AF; }
+    .cal-cell.remaining-day .day-amt { color: #6B7280; font-size: 9px; }
+
+    .day-num {
+      font-size: 13px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .today-dot {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+    }
+    .today-dot.green { background: #22C55E; }
+    .today-dot.red { background: #EF4444; }
+
+    .day-amt {
+      font-size: 10px;
+    }
+
+    .cal-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 14px;
+      font-size: 11px;
+      color: #9CA3AF;
+      flex-wrap: wrap;
+    }
+
+    /* UPI Chip styles */
+    .upi-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 12px;
+      margin: 4px;
+    }
+
+    .upi-chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22C55E;
+    }
+
+    .upi-chip-delete {
+      background: none;
+      border: none;
+      color: #EF4444;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 2px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Transaction Item */
+    .tx-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .tx-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .tx-item:active { transform: scale(0.99); }
+
+    .tx-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tx-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .tx-merchant { font-size: 14px; font-weight: 600; color: #FFFFFF; }
+    .tx-time { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+    .tx-amount { font-size: 15px; font-weight: 700; color: #FFFFFF; }
+
+    /* Preset Quick Buttons in Modal */
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 6px 10px;
+      color: #FFFFFF;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .preset-btn:hover { background: rgba(255, 255, 255, 0.12); }
+
+    /* FAB */
+    .fab-btn {
+      position: fixed;
+      bottom: 84px;
+      right: calc(50% - 240px + 20px);
+      width: 56px;
+      height: 56px;
+      border-radius: 28px;
+      background: #FFFFFF;
+      color: #000000;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(255, 255, 255, 0.25);
+      z-index: 50;
+      transition: transform 0.2s ease;
+    }
+
+    @media (max-width: 480px) { .fab-btn { right: 20px; } }
+    .fab-btn:active { transform: scale(0.92); }
+
+    /* Bottom Navigation Bar */
+    nav.bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 480px;
+      background: rgba(12, 12, 16, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 10px 4px 18px;
+      z-index: 40;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #8E8E9B;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 6px;
+      transition: color 0.15s ease;
+    }
+
+    .nav-item.active {
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    .nav-icon { font-size: 18px; pointer-events: none; }
+    .nav-label { pointer-events: none; }
+
+    /* Insights Bar Chart */
+    .bar-chart-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 150px;
+      margin-top: 14px;
+      gap: 8px;
+    }
+
+    .bar-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .bar-fill {
+      width: 70%;
+      border-radius: 6px 6px 0 0;
+      background: #FFFFFF;
+      transition: height 0.5s ease;
+      min-height: 4px;
+    }
+
+    .bar-fill.over { background: #EF4444; }
+    .bar-label { font-size: 11px; color: #9CA3AF; margin-top: 6px; }
+    .bar-val { font-size: 9px; color: #D1D5DB; margin-bottom: 4px; }
+
+    /* Modals */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.show { display: flex; }
+
+    .modal-card {
+      background: #14141C;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 24px;
+      padding: 22px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .modal-sub { font-size: 12px; color: #9CA3AF; margin-bottom: 16px; }
+    .modal-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 14px; }
+
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      color: #FFFFFF;
+      font-size: 14px;
+      margin-bottom: 12px;
+      outline: none;
+    }
+    .input-field:focus { border-color: rgba(255, 255, 255, 0.4); }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      background: #FFFFFF;
+      color: #000000;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-submit:active { transform: scale(0.98); }
+
+    .btn-close {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #FFFFFF;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Small action buttons */
+    .btn-glass-action {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .btn-glass-action:hover { background: rgba(255, 255, 255, 0.14); }
+    .btn-glass-action:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+  <div class="app-viewport">
+    <!-- Header -->
+    <header>
+      <div class="logo-container">
+        <div class="app-icon-badge">₹</div>
+        <div>
+          <div class="brand-title">DayLimit</div>
+        </div>
+      </div>
+      <div class="pill-badge" id="budget-badge" onclick="openBudgetModal()" style="cursor:pointer;" title="Tap to update budget">Budget: ₹15,000/mo ✏️</div>
+    </header>
+
+    <!-- Main Screens Container -->
+    <main id="mainContainer">
+      <!-- 1. HOME SCREEN VIEW -->
+      <section class="screen-view active" id="homeView">
+        <!-- Hero Circle Card -->
+        <div class="glass-card hero-card">
+          <div class="progress-circle-wrap">
+            <svg class="progress-svg" viewBox="0 0 170 170">
+              <circle class="progress-bg" cx="85" cy="85" r="70"></circle>
+              <circle class="progress-bar" id="circleBar" cx="85" cy="85" r="70"></circle>
+            </svg>
+            <div class="circle-inner-content">
+              <span class="circle-label">Spent Today</span>
+              <span class="circle-spent-amount" id="spentTodayText">₹0</span>
+              <span class="circle-limit-tag" id="limitTodayText">of ₹500 limit</span>
+            </div>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-pill">
+              <div class="stat-pill-label">Left Today</div>
+              <div class="stat-pill-val" id="leftTodayVal" style="color: #22C55E;">₹500</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-pill-label">Month Left</div>
+              <div class="stat-pill-val" id="monthLeftVal">₹15,000</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-pill-label">Days Left</div>
+              <div class="stat-pill-val" id="daysLeftVal">--</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Calendar Card (Home Only) -->
+        <div class="glass-card calendar-card">
+          <div class="calendar-header">
+            <div class="cal-title-block">
+              <span class="cal-month-title" id="calMonthTitle">October 2026</span>
+            </div>
+            <div class="pill-badge" id="calDaysLeftPill">-- days left</div>
+          </div>
+
+          <div class="cal-weekday-row">
+            <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+          </div>
+
+          <div class="cal-grid" id="calGrid"></div>
+
+          <div class="cal-hint">
+            <span><span style="color:#22C55E; font-weight:bold;">●</span> Within Limit</span>
+            <span><span style="color:#EF4444; font-weight:bold;">●</span> Over Limit</span>
+            <span><span style="color:#6B7280; font-weight:bold;">●</span> Remaining</span>
+          </div>
+        </div>
+
+        <!-- Quick Actions Bar: Quick Add & Paste SMS -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <button class="btn-submit" style="padding:12px; margin:0;" onclick="openAddModal()">
+            <span>➕</span><span>Quick Add</span>
+          </button>
+          <button class="btn-glass-action" style="padding:12px; justify-content:center; font-size:13px;" onclick="openPasteSmsModal()">
+            <span>📋</span><span>Paste SMS</span>
+          </button>
+        </div>
+
+        <!-- UPI Integration Hub: Visible on Home only when NO apps are connected yet. Once connected, disappears from Home and is managed in Settings. -->
+        <div class="glass-card" id="homeUpiCard">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:15px; font-weight:700;">UPI Integration</div>
+              <div style="font-size:11px; color:#9CA3AF;" id="integratedCountLabel">0 Apps Connected</div>
+            </div>
+            <button class="btn-glass-action" onclick="openIntegrateUpiModal()">Connect UPI</button>
+          </div>
+
+          <p style="font-size:12px; color:#9CA3AF; margin-top:8px;">
+            Connect your UPI apps (GPay, PhonePe, Paytm, etc.) to automatically track spends and rebalance your daily limit.
+          </p>
+
+          <div id="integratedUpiList" style="margin-top:10px;">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Today's Transactions -->
+        <div class="glass-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <span style="font-weight:700; font-size:14px;">Today's Spends</span>
+            <span style="font-size:12px; color:#9CA3AF;" id="txCountBadge">0 logged</span>
+          </div>
+          <div id="txList"></div>
+        </div>
+      </section>
+
+      <!-- 2. HISTORY SCREEN VIEW (NO CALENDAR) -->
+      <section class="screen-view" id="historyView">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:22px; font-weight:800;">Spend History</div>
+            <div style="font-size:12px; color:#9CA3AF;">Day-wise spending and dynamic rebalancing records</div>
+          </div>
+        </div>
+
+        <!-- Filter Row -->
+        <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;" id="historyFilterRow">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Day-Wise Spend Summaries List -->
+        <div id="historyDayWiseList" style="display:flex; flex-direction:column; gap:10px;">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- 3. INSIGHTS SCREEN VIEW -->
+      <section class="screen-view" id="insightsView">
+        <div>
+          <div style="font-size:22px; font-weight:800;">Spend Insights</div>
+          <div style="font-size:12px; color:#9CA3AF;">Weekly patterns and UPI app distribution</div>
+        </div>
+
+        <!-- Summary Metric Cards -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="glass-card" style="padding:16px;">
+            <div style="font-size:11px; color:#9CA3AF;">DAILY AVERAGE</div>
+            <div style="font-size:22px; font-weight:800; margin-top:4px;" id="insightAvgDaily">₹0</div>
+            <div style="font-size:10px; color:#22C55E; margin-top:2px;">Across active days</div>
+          </div>
+          <div class="glass-card" style="padding:16px;">
+            <div style="font-size:11px; color:#9CA3AF;">BASELINE TARGET</div>
+            <div style="font-size:22px; font-weight:800; margin-top:4px;" id="insightBaseline">₹500</div>
+            <div style="font-size:10px; color:#9CA3AF; margin-top:2px;">Original daily target</div>
+          </div>
+        </div>
+
+        <!-- Weekly Trend Chart -->
+        <div class="glass-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:13px; font-weight:700; letter-spacing:0.5px;">LAST 7 DAYS SPENDS</div>
+            <span class="pill-badge">Trend</span>
+          </div>
+          <div class="bar-chart-container" id="weeklyBarChart"></div>
+        </div>
+
+        <!-- Best & Highest Spend Days -->
+        <div class="glass-card">
+          <div style="font-size:13px; font-weight:700; letter-spacing:0.5px; margin-bottom:12px;">KEY HIGHLIGHTS</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; justify-content:space-between; font-size:13px;">
+              <span style="color:#9CA3AF;">Lowest Spend Day:</span>
+              <strong id="insightBestDay" style="color:#22C55E;">--</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:13px;">
+              <span style="color:#9CA3AF;">Highest Spend Day:</span>
+              <strong id="insightWorstDay" style="color:#EF4444;">--</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spend by UPI App -->
+        <div class="glass-card">
+          <div style="font-size:13px; font-weight:700; letter-spacing:0.5px; margin-bottom:12px;">SPEND BY UPI APP</div>
+          <div id="upiBreakdownList" style="display:flex; flex-direction:column; gap:10px;">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. SETTINGS SCREEN VIEW -->
+      <section class="screen-view" id="settingsView">
+        <div>
+          <div style="font-size:22px; font-weight:800;">Settings</div>
+          <div style="font-size:12px; color:#9CA3AF;">Profile, subscription plan, and preferences</div>
+        </div>
+
+        <!-- 1. Profile & Personal Details Card -->
+        <div class="glass-card" style="display:flex; flex-direction:column; align-items:center; text-align:center; padding:22px 16px;">
+          <!-- Profile Image with sleek circular border -->
+          <div style="position:relative;">
+            <div id="profileAvatarContainer" style="width:78px; height:78px; border-radius:50%; background:linear-gradient(135deg, #2E2E3E, #14141E); border:2px solid rgba(255,255,255,0.45); display:flex; align-items:center; justify-content:center; margin-bottom:12px; box-shadow:0 8px 24px rgba(0,0,0,0.5); overflow:hidden;">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+          </div>
+          
+          <div style="font-size:18px; font-weight:800; color:#FFFFFF;" id="profileNameDisplay">Revathi Lakshmi</div>
+
+          <!-- Personal Details Container -->
+          <div style="width:100%; background:rgba(20,20,30,0.6); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:12px 14px; margin:14px 0; text-align:left; display:flex; flex-direction:column; gap:10px;">
+            <!-- Mobile Number -->
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:28px; height:28px; border-radius:8px; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="#9CA3AF"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+              </div>
+              <div>
+                <div style="font-size:11px; color:#9CA3AF;">Mobile Number</div>
+                <div style="font-size:13px; font-weight:600; color:#FFFFFF;" id="profilePhoneDisplay">+91 98765 43210</div>
+              </div>
+            </div>
+
+            <div style="height:1px; background:rgba(255,255,255,0.06);"></div>
+
+            <!-- Email ID -->
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:28px; height:28px; border-radius:8px; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="#9CA3AF"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+              </div>
+              <div style="overflow:hidden;">
+                <div style="font-size:11px; color:#9CA3AF;">Email ID</div>
+                <div style="font-size:13px; font-weight:600; color:#FFFFFF; word-break:break-all;" id="profileEmailDisplay">revathilakshmipulavarthi@gmail.com</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Buttons: Edit Details & Log Out -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%;">
+            <button class="btn-glass-action" style="justify-content:center; padding:10px;" onclick="openEditProfileModal()">Edit Details</button>
+            <button class="btn-glass-action" style="justify-content:center; padding:10px; color:#EF4444; border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.08); font-weight:700;" onclick="handleLogout()">Log Out</button>
+          </div>
+        </div>
+
+        <!-- 2. Subscription Plan Card (Below Personal Details) -->
+        <div class="glass-card" style="border-color:rgba(34,197,94,0.45);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:36px; height:36px; border-radius:10px; background:rgba(34,197,94,0.15); display:flex; align-items:center; justify-content:center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#22C55E"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+              </div>
+              <div>
+                <div style="font-size:15px; font-weight:700; color:#FFFFFF;">DayLimit Pro</div>
+                <div style="font-size:11px; color:#9CA3AF;">Subscription Plan</div>
+              </div>
+            </div>
+            <div style="background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.5); border-radius:20px; padding:3px 10px; font-size:11px; font-weight:800; color:#22C55E;">ACTIVE</div>
+          </div>
+
+          <div style="display:flex; align-items:baseline; gap:4px; margin:14px 0 2px 0;">
+            <span style="font-size:26px; font-weight:900; color:#FFFFFF;">₹99</span>
+            <span style="font-size:13px; color:#9CA3AF;">/ month</span>
+          </div>
+
+          <div style="font-size:12px; color:#9CA3AF; margin-bottom:12px;">
+            Subscription plan is Rs 99/- per month. Auto-renews on 29 Nov 2026.
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px; font-size:12px; color:#D1D5DB;">
+            <div style="display:flex; align-items:center; gap:6px;"><span style="color:#22C55E; font-weight:bold;">✓</span> Automatic UPI spend tracking from connected apps</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span style="color:#22C55E; font-weight:bold;">✓</span> Dynamic daily rebalancing &amp; spillover calculations</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span style="color:#22C55E; font-weight:bold;">✓</span> Visual calendar with overspend alerts</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span style="color:#22C55E; font-weight:bold;">✓</span> 100% private, on-device financial tracking</div>
+          </div>
+
+          <button class="btn-submit" style="width:100%; padding:10px; margin-bottom:0;" onclick="openManageSubModal()">Manage Subscription</button>
+        </div>
+
+        <!-- Monthly Budget Card -->
+        <div class="glass-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:12px; color:#9CA3AF;">Monthly Budget</div>
+              <div style="font-size:24px; font-weight:800;" id="settingsBudgetVal">₹15,000</div>
+            </div>
+            <button class="btn-glass-action" onclick="openBudgetModal()">Edit</button>
+          </div>
+        </div>
+
+        <!-- Connected UPI Apps Manager Card -->
+        <div class="glass-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div>
+              <div style="font-size:14px; font-weight:700;">Connected UPI Apps</div>
+              <div style="font-size:11px; color:#9CA3AF;">Connect or disconnect UPI apps</div>
+            </div>
+            <button class="btn-glass-action" onclick="openIntegrateUpiModal()">Connect UPI</button>
+          </div>
+          <div id="settingsUpiList"></div>
+        </div>
+
+        <!-- Privacy Card -->
+        <div class="glass-card">
+          <div style="font-size:14px; font-weight:700; margin-bottom:4px;">🔒 100% On-Device Privacy</div>
+          <p style="font-size:12px; color:#9CA3AF; line-height:16px;">
+            DayLimit never accesses bank accounts and never moves money. It strictly calculates dynamic rebalancing directly on your device.
+          </p>
+        </div>
+
+        <!-- Reset Actions -->
+        <div class="glass-card" style="display:flex; flex-direction:column; gap:10px;">
+          <button class="btn-glass-action" style="color:#EF4444; border-color:rgba(239,68,68,0.3); justify-content:center;" onclick="handleResetMonth()">
+            Reset Current Month Spends
+          </button>
+          <button class="btn-glass-action" style="color:#EF4444; border-color:rgba(239,68,68,0.3); justify-content:center;" onclick="handleResetAll()">
+            Clear All App Data
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Floating Action Button (+) -->
+    <button class="fab-btn" onclick="openAddModal()" aria-label="Add spend">+</button>
+
+    <!-- Bottom Navigation Bar with deep linking & data-tabs -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="home" onclick="handleNavClick('home')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </button>
+      <button class="nav-item" data-tab="history" onclick="handleNavClick('history')">
+        <span class="nav-icon">🕒</span>
+        <span class="nav-label">History</span>
+      </button>
+      <button class="nav-item" data-tab="insights" onclick="handleNavClick('insights')">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Insights</span>
+      </button>
+      <button class="nav-item" data-tab="settings" onclick="handleNavClick('settings')">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Settings</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Day Detail Modal -->
+  <div class="modal-backdrop" id="dayDetailModal" onclick="closeDayModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-title" id="modalDayTitle">Day Breakdown</div>
+      <div class="modal-sub" id="modalDayDate">--</div>
+      <div class="modal-row"><span style="color:#9CA3AF;">Daily Limit:</span><strong id="modalDayLimit">₹0</strong></div>
+      <div class="modal-row"><span style="color:#9CA3AF;">Amount Spent:</span><strong id="modalDaySpent">₹0</strong></div>
+      <div class="modal-row"><span style="color:#9CA3AF;" id="modalDayBalLabel">Remaining:</span><strong id="modalDayBal">₹0</strong></div>
+      <p style="font-size:12px; color:#9CA3AF; margin-top:10px;" id="modalDayExpl"></p>
+      <button class="btn-close" onclick="closeDayModal()">Close</button>
+    </div>
+  </div>
+
+  <!-- Quick Add Transaction Modal -->
+  <div class="modal-backdrop" id="addTxModal" onclick="closeAddModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-title">Quick Add Spend</div>
+      <div class="modal-sub">Log an expense to dynamically rebalance your daily budget</div>
+
+      <!-- Quick Preset Chips -->
+      <div style="font-size:11px; color:#9CA3AF; margin-bottom:6px;">Quick Presets:</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;">
+        <button type="button" class="preset-btn" onclick="applyPreset(20, 'Chai / Coffee', 'Food &amp; Dining')">☕ Chai ₹20</button>
+        <button type="button" class="preset-btn" onclick="applyPreset(150, 'Lunch', 'Food &amp; Dining')">🍛 Lunch ₹150</button>
+        <button type="button" class="preset-btn" onclick="applyPreset(250, 'Swiggy Order', 'Food &amp; Dining')">🍕 Swiggy ₹250</button>
+        <button type="button" class="preset-btn" onclick="applyPreset(350, 'Groceries', 'Groceries')">🛒 Groceries ₹350</button>
+        <button type="button" class="preset-btn" onclick="applyPreset(200, 'Fuel / Petrol', 'Transport')">⛽ Fuel ₹200</button>
+        <button type="button" class="preset-btn" onclick="applyPreset(180, 'Auto / Uber', 'Transport')">🚖 Cab ₹180</button>
+      </div>
+
+      <form onsubmit="handleSaveTx(event)">
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Amount (₹)</div>
+        <input class="input-field" type="number" id="txAmount" placeholder="Amount (e.g. 150)" required autofocus step="any">
+
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Merchant / Note</div>
+        <input class="input-field" type="text" id="txMerchant" placeholder="e.g. Chai Point, Groceries, Swiggy" required>
+
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">UPI App</div>
+        <select class="input-field" id="txUpiApp"></select>
+
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Category</div>
+        <select class="input-field" id="txCategory">
+          <option value="Food &amp; Dining">🍔 Food &amp; Dining</option>
+          <option value="Groceries">🛒 Groceries</option>
+          <option value="Transport">🚗 Transport</option>
+          <option value="Shopping">🛍️ Shopping</option>
+          <option value="Bills &amp; Utilities">💡 Bills &amp; Utilities</option>
+          <option value="Entertainment">🎬 Entertainment</option>
+          <option value="Health">💊 Health</option>
+          <option value="Other">📦 Other</option>
+        </select>
+
+        <button type="submit" class="btn-submit">Save Transaction</button>
+        <button type="button" class="btn-close" onclick="closeAddModal()">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit / Delete Transaction Modal -->
+  <div class="modal-backdrop" id="editTxModal" onclick="closeEditTxModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-title">Edit Spend Record</div>
+      <div class="modal-sub">Update or remove this transaction</div>
+      <form onsubmit="handleUpdateTx(event)">
+        <input type="hidden" id="editTxId">
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Amount (₹)</div>
+        <input class="input-field" type="number" id="editTxAmount" required step="any">
+
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Merchant / Note</div>
+        <input class="input-field" type="text" id="editTxMerchant" required>
+
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">UPI App</div>
+        <select class="input-field" id="editTxUpiApp"></select>
+
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Category</div>
+        <select class="input-field" id="editTxCategory">
+          <option value="Food &amp; Dining">🍔 Food &amp; Dining</option>
+          <option value="Groceries">🛒 Groceries</option>
+          <option value="Transport">🚗 Transport</option>
+          <option value="Shopping">🛍️ Shopping</option>
+          <option value="Bills &amp; Utilities">💡 Bills &amp; Utilities</option>
+          <option value="Entertainment">🎬 Entertainment</option>
+          <option value="Health">💊 Health</option>
+          <option value="Other">📦 Other</option>
+        </select>
+
+        <button type="submit" class="btn-submit">Update Spend</button>
+        <button type="button" class="btn-glass-action" style="width:100%; justify-content:center; color:#EF4444; border-color:rgba(239,68,68,0.4); margin-top:8px; padding:12px; font-weight:700;" onclick="handleDeleteTx()">
+          Delete Transaction
+        </button>
+        <button type="button" class="btn-close" onclick="closeEditTxModal()">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Paste SMS / Auto-Track Modal -->
+  <div class="modal-backdrop" id="pasteSmsModal" onclick="closePasteSmsModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-title">📋 Paste SMS / UPI Text</div>
+      <div class="modal-sub">Paste an SMS or notification from your bank or UPI app to auto-track spend</div>
+
+      <div style="margin-bottom:10px;">
+        <textarea class="input-field" id="smsInputArea" rows="4" placeholder="e.g. Debited Rs 350.00 via Google Pay to Swiggy on 29-10-2026. Avail Bal: Rs 15,200" style="resize:none;" oninput="previewParsedSms()"></textarea>
+      </div>
+
+      <!-- Live Extracted Preview -->
+      <div id="smsParsedCard" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:12px; margin-bottom:14px;">
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:6px;">PARSED DETAILS</div>
+        <div style="display:flex; justify-content:space-between; margin:4px 0; font-size:13px;">
+          <span style="color:#9CA3AF;">Amount:</span>
+          <strong id="smsExtractedAmount" style="color:#22C55E;">--</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin:4px 0; font-size:13px;">
+          <span style="color:#9CA3AF;">Merchant:</span>
+          <strong id="smsExtractedMerchant">--</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin:4px 0; font-size:13px;">
+          <span style="color:#9CA3AF;">UPI App:</span>
+          <strong id="smsExtractedApp">--</strong>
+        </div>
+        <div id="smsStatusMsg" style="font-size:11px; color:#9CA3AF; margin-top:8px; line-height:14px;">
+          Paste an SMS above to extract spend.
+        </div>
+      </div>
+
+      <button type="button" class="btn-submit" id="btnAutoTrackSms" onclick="confirmParsedSms()" disabled>Auto-Track Spend</button>
+      <button type="button" class="btn-close" onclick="closePasteSmsModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Connect UPI Modal -->
+  <div class="modal-backdrop" id="integrateUpiModal" onclick="closeIntegrateUpiModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <div class="modal-title" style="margin-bottom:0;">Connect UPI</div>
+        <button type="button" class="btn-glass-action" style="padding:4px 10px; font-size:16px; line-height:1;" onclick="closeIntegrateUpiModal()">&times;</button>
+      </div>
+      <div class="modal-sub">Connect your UPI apps to automatically track spends. Connected apps are tracked in real-time.</div>
+      
+      <div id="modalUpiAppsList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
+        <!-- Rendered dynamically by JS -->
+      </div>
+
+      <div style="font-size:12px; color:#9CA3AF; margin-bottom:6px;">Or Connect Another UPI App:</div>
+      <div style="display:flex; gap:8px;">
+        <input class="input-field" type="text" id="customUpiInput" placeholder="App Name (e.g. Jupiter, FamPay)" style="margin-bottom:0;">
+        <button type="button" class="btn-submit" style="width:90px; padding:0;" onclick="handleAddCustomUpi()">Connect</button>
+      </div>
+      <button class="btn-close" style="margin-top:14px;" onclick="closeIntegrateUpiModal()">Done</button>
+    </div>
+  </div>
+
+  <!-- Edit Budget Modal -->
+  <div class="modal-backdrop" id="budgetModal" onclick="closeBudgetModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-title">Edit Monthly Budget</div>
+      <div class="modal-sub">Update budget in ₹ to recalculate daily limits</div>
+      <form onsubmit="handleSaveBudget(event)">
+        <input class="input-field" type="number" id="editBudgetValue" placeholder="Monthly Budget (₹)" required step="any">
+        <button type="submit" class="btn-submit">Update Budget</button>
+        <button type="button" class="btn-close" onclick="closeBudgetModal()">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Personal Details Modal -->
+  <div class="modal-backdrop" id="editProfileModal" onclick="closeEditProfileModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-title">Edit Personal Details</div>
+      <div class="modal-sub">Update your profile name, mobile number, and email</div>
+      <form onsubmit="handleSaveProfile(event)">
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Full Name</div>
+        <input class="input-field" type="text" id="editProfileName" placeholder="Your Name" required>
+
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Mobile Number</div>
+        <input class="input-field" type="tel" id="editProfilePhone" placeholder="+91 98765 43210" required>
+
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Email ID</div>
+        <input class="input-field" type="email" id="editProfileEmail" placeholder="your.email@example.com" required>
+
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Profile Avatar URL or Emoji</div>
+        <input class="input-field" type="text" id="editProfileAvatar" placeholder="Image URL or leave empty for default">
+
+        <button type="submit" class="btn-submit">Save Details</button>
+        <button type="button" class="btn-close" onclick="closeEditProfileModal()">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Subscription Plan Modal -->
+  <div class="modal-backdrop" id="manageSubModal" onclick="closeManageSubModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-title">Subscription Plan Details</div>
+      <div class="modal-sub">DayLimit is a subscription-based financial management app</div>
+      
+      <div style="background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.3); border-radius:14px; padding:16px; margin:14px 0;">
+        <div style="font-size:16px; font-weight:800; color:#FFFFFF;">DayLimit Pro Membership</div>
+        <div style="font-size:18px; font-weight:900; color:#22C55E; margin:6px 0;">₹99 / month (Rs 99/- per month)</div>
+        <div style="font-size:12px; color:#D1D5DB;">Status: <strong>Active</strong> • Auto-renews on 29 Nov 2026</div>
+        <div style="font-size:11px; color:#9CA3AF; margin-top:4px;">Billing via: UPI AutoPay</div>
+      </div>
+
+      <p style="font-size:12px; color:#9CA3AF; line-height:16px; margin-bottom:14px;">
+        Your subscription unlocks automated UPI spend tracking, intelligent dynamic daily rebalancing, spillover calculations, and detailed analytics.
+      </p>
+
+      <button type="button" class="btn-submit" onclick="closeManageSubModal()">Done</button>
+    </div>
+  </div>
+
+  <script>
+    // DayLimit Persistent State (LocalStorage backed)
+    let monthlyBudget = parseFloat(localStorage.getItem('daylimit_budget')) || 15000;
+    
+    // Default to empty array like Android emptySet() so Home page displays the connect section initially
+    let integratedUpiApps = JSON.parse(localStorage.getItem('daylimit_upi_apps') || '[]');
+    
+    let transactions = JSON.parse(localStorage.getItem('daylimit_txs')) || [
+      { id: 1, amount: 120, merchant: "Swiggy UPI", upiApp: "Google Pay", category: "Food & Dining", day: new Date().getDate(), time: "1:15 PM" }
+    ];
+
+    let profileData = JSON.parse(localStorage.getItem('daylimit_profile')) || {
+      name: "Revathi Lakshmi",
+      phone: "+91 98765 43210",
+      email: "revathilakshmipulavarthi@gmail.com",
+      plan: "DayLimit Pro",
+      price: "₹99 / month",
+      avatar: ""
+    };
+
+    let currentSelectedFilter = null;
+    let currentActiveTab = 'home';
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const currentDay = now.getDate();
+    const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const firstDayOfWeekIndex = new Date(currentYear, currentMonth, 1).getDay();
+
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    const AVAILABLE_UPI_APPS = [
+      { name: "Google Pay", label: "Google Pay (GPay)" },
+      { name: "PhonePe", label: "PhonePe" },
+      { name: "Paytm", label: "Paytm" },
+      { name: "BHIM UPI", label: "BHIM UPI" },
+      { name: "Amazon Pay", label: "Amazon Pay" },
+      { name: "CRED", label: "CRED" }
+    ];
+
+    function saveState() {
+      try {
+        localStorage.setItem('daylimit_budget', monthlyBudget.toString());
+        localStorage.setItem('daylimit_upi_apps', JSON.stringify(integratedUpiApps));
+        localStorage.setItem('daylimit_txs', JSON.stringify(transactions));
+        localStorage.setItem('daylimit_profile', JSON.stringify(profileData));
+      } catch (e) {
+        console.warn("Storage save error", e);
+      }
+    }
+
+    function getCalculation() {
+      const pastTxs = transactions.filter(t => t.day < currentDay);
+      const spentBeforeToday = pastTxs.reduce((sum, t) => sum + t.amount, 0);
+
+      const daysRemaining = Math.max(1, totalDaysInMonth - currentDay + 1);
+      const availableForRemaining = monthlyBudget - spentBeforeToday;
+      const dailyLimitToday = availableForRemaining > 0 ? (availableForRemaining / daysRemaining) : 0;
+
+      const todayTxs = transactions.filter(t => t.day === currentDay);
+      const spentToday = todayTxs.reduce((sum, t) => sum + t.amount, 0);
+      const remainingToday = dailyLimitToday - spentToday;
+      const isOverToday = remainingToday < 0;
+
+      const totalSpentMonth = transactions.reduce((sum, t) => sum + t.amount, 0);
+      const remainingMonthBudget = Math.max(0, monthlyBudget - totalSpentMonth);
+
+      return {
+        monthlyBudget,
+        dailyLimitToday,
+        spentToday,
+        remainingToday,
+        isOverToday,
+        daysRemaining,
+        remainingMonthBudget,
+        spentBeforeToday
+      };
+    }
+
+    // Deep Linking & Tab Navigation Handler
+    function handleNavClick(tab, updateHash = true) {
+      currentActiveTab = tab;
+
+      if (updateHash && window.location.hash !== '#' + tab) {
+        window.location.hash = tab;
+      }
+
+      // Update Nav Buttons
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        if (btn.getAttribute('data-tab') === tab) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Show Selected Screen View
+      document.querySelectorAll('.screen-view').forEach(view => {
+        view.classList.remove('active');
+      });
+
+      const targetView = document.getElementById(tab + 'View');
+      if (targetView) {
+        targetView.classList.add('active');
+      }
+
+      // Render tab-specific content
+      if (tab === 'home') renderUI();
+      else if (tab === 'history') renderHistory();
+      else if (tab === 'insights') renderInsights();
+      else if (tab === 'settings') renderSettings();
+
+      // Scroll viewport to top
+      const mc = document.getElementById('mainContainer');
+      if (mc) mc.scrollTop = 0;
+    }
+
+    // Sync tab with URL Hash (e.g. #history, #settings, #insights)
+    function syncTabFromHash() {
+      const hash = window.location.hash.replace('#', '').toLowerCase();
+      const validTabs = ['home', 'history', 'insights', 'settings'];
+      const activeTab = validTabs.includes(hash) ? hash : 'home';
+      handleNavClick(activeTab, false);
+    }
+    window.addEventListener('hashchange', syncTabFromHash);
+
+    // Render Home Screen
+    function renderUI() {
+      const calc = getCalculation();
+
+      document.getElementById('budget-badge').innerText = `Budget: ₹${Math.round(monthlyBudget).toLocaleString('en-IN')}/mo ✏️`;
+      document.getElementById('calMonthTitle').innerText = `${monthNames[currentMonth]} ${currentYear}`;
+      document.getElementById('daysLeftVal').innerText = calc.daysRemaining;
+      document.getElementById('calDaysLeftPill').innerText = `${calc.daysRemaining} days left`;
+      document.getElementById('spentTodayText').innerText = `₹${Math.round(calc.spentToday)}`;
+      document.getElementById('limitTodayText').innerText = `of ₹${Math.round(calc.dailyLimitToday)} limit`;
+      document.getElementById('monthLeftVal').innerText = `₹${Math.round(calc.remainingMonthBudget).toLocaleString('en-IN')}`;
+
+      const leftTodayEl = document.getElementById('leftTodayVal');
+      if (calc.isOverToday) {
+        leftTodayEl.innerText = `-₹${Math.round(Math.abs(calc.remainingToday))}`;
+        leftTodayEl.style.color = '#EF4444';
+      } else {
+        leftTodayEl.innerText = `₹${Math.round(calc.remainingToday)}`;
+        leftTodayEl.style.color = '#22C55E';
+      }
+
+      // Circular Progress
+      const circleBar = document.getElementById('circleBar');
+      const circumference = 2 * Math.PI * 70;
+      const fraction = calc.dailyLimitToday > 0 ? Math.min(1.2, calc.spentToday / calc.dailyLimitToday) : 1;
+      circleBar.style.strokeDashoffset = circumference - (Math.min(1, fraction) * circumference);
+      circleBar.style.stroke = fraction > 1 ? '#EF4444' : fraction > 0.8 ? '#F59E0B' : '#22C55E';
+
+      // Render Home Sections
+      renderCalendar(calc);
+      renderIntegratedUpiList();
+      renderTodayTransactions();
+    }
+
+    function renderCalendar(calc) {
+      const calGrid = document.getElementById('calGrid');
+      calGrid.innerHTML = '';
+
+      for (let i = 0; i < firstDayOfWeekIndex; i++) {
+        const spacer = document.createElement('div');
+        spacer.className = 'cal-cell cal-cell-empty';
+        calGrid.appendChild(spacer);
+      }
+
+      let runningBudget = monthlyBudget;
+      const dayData = {};
+
+      for (let d = 1; d < currentDay; d++) {
+        const daysRem = totalDaysInMonth - d + 1;
+        const limitD = runningBudget > 0 ? (runningBudget / daysRem) : 0;
+        const spentD = transactions.filter(t => t.day === d).reduce((s, t) => s + t.amount, 0);
+        const remD = limitD - spentD;
+        dayData[d] = { limit: limitD, spent: spentD, remaining: remD, isOver: remD < -0.01 };
+        runningBudget -= spentD;
+      }
+
+      for (let day = 1; day <= totalDaysInMonth; day++) {
+        const cell = document.createElement('div');
+        const isCompleted = day < currentDay;
+        const isToday = day === currentDay;
+        const isRemaining = day > currentDay;
+
+        let cellClass = 'cal-cell';
+        let balanceText = '';
+
+        if (isToday) {
+          const isOver = calc.isOverToday;
+          cellClass += isOver ? ' today-excess' : ' today-within';
+          const spentToday = calc.spentToday;
+          balanceText = spentToday >= 1000 ? `₹${(spentToday / 1000).toFixed(1)}K` : `₹${Math.round(spentToday)}`;
+          cell.innerHTML = `
+            <div class="day-num">${day}<span class="today-dot ${isOver ? 'red' : 'green'}"></span></div>
+            <div class="day-amt">${balanceText}</div>
+          `;
+        } else if (isCompleted) {
+          const info = dayData[day] || { limit: 500, spent: 0, remaining: 500, isOver: false };
+          cellClass += info.isOver ? ' completed-excess' : ' completed-within';
+          const spentDay = info.spent;
+          balanceText = spentDay >= 1000 ? `₹${(spentDay / 1000).toFixed(1)}K` : `₹${Math.round(spentDay)}`;
+          cell.innerHTML = `
+            <div class="day-num">${day}</div>
+            <div class="day-amt">${balanceText}</div>
+          `;
+        } else {
+          // Remaining Day: Dark Gray stroke
+          cellClass += ' remaining-day';
+          const futureDaysCount = Math.max(1, totalDaysInMonth - currentDay);
+          const futureLimit = calc.remainingMonthBudget > 0 ? (calc.remainingMonthBudget / futureDaysCount) : 0;
+          balanceText = futureLimit >= 1000 ? `₹${(futureLimit / 1000).toFixed(1)}K` : `₹${Math.round(futureLimit)}`;
+          cell.innerHTML = `
+            <div class="day-num">${day}</div>
+            <div class="day-amt">${balanceText}</div>
+          `;
+        }
+
+        cell.className = cellClass;
+        cell.onclick = () => openDayModal(day, isCompleted, isToday, isRemaining, calc, dayData[day]);
+        calGrid.appendChild(cell);
+      }
+    }
+
+    function renderIntegratedUpiList() {
+      const homeUpiCard = document.getElementById('homeUpiCard');
+      if (homeUpiCard) {
+        // Once integrated with any UPI app, home page integrate section disappears and shows only in settings page
+        homeUpiCard.style.display = integratedUpiApps.length > 0 ? 'none' : 'block';
+      }
+
+      const container = document.getElementById('integratedUpiList');
+      if (!container) return;
+      const countLabel = document.getElementById('integratedCountLabel');
+      if (countLabel) countLabel.innerText = `${integratedUpiApps.length} Apps Connected`;
+
+      if (integratedUpiApps.length === 0) {
+        container.innerHTML = `
+          <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px; text-align:center; color:#8E8E9B; font-size:12px;">
+            No UPI apps connected yet. Tap 'Connect UPI' to enable automatic tracking.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = integratedUpiApps.map(app => `
+        <div class="upi-chip">
+          <span class="upi-chip-dot"></span>
+          <span>${app}</span>
+          <button class="upi-chip-delete" title="Disconnect ${app}" onclick="removeUpiApp('${app}')">&times;</button>
+        </div>
+      `).join('');
+    }
+
+    function renderTodayTransactions() {
+      const txList = document.getElementById('txList');
+      const todayTxs = transactions.filter(t => t.day === currentDay);
+      document.getElementById('txCountBadge').innerText = `${todayTxs.length} logged`;
+
+      if (todayTxs.length === 0) {
+        txList.innerHTML = `<div style="text-align:center; padding:16px 0; color:#8E8E9B; font-size:13px;">No spends logged today. Tap Quick Add or + to add one!</div>`;
+        return;
+      }
+
+      txList.innerHTML = todayTxs.map(t => `
+        <div class="tx-item" onclick="openEditTxModal(${t.id})">
+          <div class="tx-left">
+            <div class="tx-badge">${(t.upiApp || 'UPI').slice(0, 2).toUpperCase()}</div>
+            <div>
+              <div class="tx-merchant">${t.merchant}</div>
+              <div class="tx-time">${t.time || ''} • ${t.upiApp || 'UPI'} • ${t.category || 'General'}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div class="tx-amount">-₹${t.amount}</div>
+            <div style="font-size:10px; color:#9CA3AF;">Edit ✎</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 2. Render History Page
+    function renderHistory() {
+      const filterRow = document.getElementById('historyFilterRow');
+      const listContainer = document.getElementById('historyDayWiseList');
+      const calc = getCalculation();
+
+      // Filters
+      const upiOptions = ["All", ...new Set([...integratedUpiApps, "Google Pay", "PhonePe", "Paytm", "Other"])];
+      filterRow.innerHTML = upiOptions.map(app => {
+        const isSelected = (app === "All" && currentSelectedFilter === null) || (currentSelectedFilter === app);
+        return `
+          <button class="btn-glass-action" style="${isSelected ? 'background:#FFFFFF; color:#000000; font-weight:700;' : ''}" onclick="setHistoryFilter('${app}')">
+            ${app}
+          </button>
+        `;
+      }).join('');
+
+      // Build Days List
+      let days = [];
+      for (let d = currentDay; d >= 1; d--) {
+        days.push(d);
+      }
+
+      listContainer.innerHTML = days.map(d => {
+        let dayTxs = transactions.filter(t => t.day === d);
+        if (currentSelectedFilter) {
+          dayTxs = dayTxs.filter(t => (t.upiApp || '').toLowerCase().includes(currentSelectedFilter.toLowerCase()));
+        }
+
+        const daySpent = dayTxs.reduce((s, t) => s + t.amount, 0);
+        const isToday = d === currentDay;
+        const limitD = isToday ? calc.dailyLimitToday : (calc.monthlyBudget / totalDaysInMonth);
+        const isOver = daySpent > limitD;
+        const statusLabel = isOver 
+          ? `<span style="color:#EF4444; font-weight:700;">Over Limit (+₹${Math.round(daySpent - limitD)})</span>`
+          : `<span style="color:#22C55E; font-weight:700;">Under Limit (Saved ₹${Math.round(limitD - daySpent)})</span>`;
+
+        return `
+          <div class="glass-card" style="padding:14px; border-radius:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-size:14px; font-weight:700; color:#FFFFFF;">${d} ${monthNames[currentMonth]} ${currentYear} ${isToday ? '<span class="pill-badge" style="font-size:10px; padding:2px 6px;">Today</span>' : ''}</div>
+                <div style="font-size:11px; color:#9CA3AF; margin-top:2px;">Limit: ₹${Math.round(limitD)}</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:15px; font-weight:700; color:#FFFFFF;">₹${Math.round(daySpent)}</div>
+                <div style="font-size:10px; margin-top:2px;">${statusLabel}</div>
+              </div>
+            </div>
+            ${dayTxs.length > 0 ? `
+              <div style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);">
+                ${dayTxs.map(t => `
+                  <div class="tx-item" style="padding:8px 10px; margin-bottom:4px;" onclick="openEditTxModal(${t.id})">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="font-size:11px; padding:2px 6px; background:rgba(255,255,255,0.08); border-radius:6px;">${t.upiApp || 'UPI'}</span>
+                      <span style="color:#D1D5DB; font-size:12px;">${t.merchant}</span>
+                    </div>
+                    <span style="font-weight:700; font-size:13px;">₹${t.amount}</span>
+                  </div>
+                `).join('')}
+              </div>
+            ` : '<div style="font-size:11px; color:#8E8E9B; margin-top:8px;">No transactions for this day</div>'}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setHistoryFilter(app) {
+      currentSelectedFilter = app === "All" ? null : app;
+      renderHistory();
+    }
+
+    // 3. Render Insights Page
+    function renderInsights() {
+      const calc = getCalculation();
+      const totalMonthSpent = transactions.reduce((s, t) => s + t.amount, 0);
+      const daysCounted = Math.max(1, currentDay);
+      const avgDaily = totalMonthSpent / daysCounted;
+
+      document.getElementById('insightAvgDaily').innerText = `₹${Math.round(avgDaily)}`;
+      document.getElementById('insightBaseline').innerText = `₹${Math.round(calc.monthlyBudget / totalDaysInMonth)}`;
+
+      // Best and worst days
+      let daySpends = {};
+      transactions.forEach(t => {
+        daySpends[t.day] = (daySpends[t.day] || 0) + t.amount;
+      });
+
+      const entries = Object.entries(daySpends);
+      if (entries.length > 0) {
+        entries.sort((a, b) => a[1] - b[1]);
+        document.getElementById('insightBestDay').innerText = `Day ${entries[0][0]} (₹${Math.round(entries[0][1])})`;
+        document.getElementById('insightWorstDay').innerText = `Day ${entries[entries.length - 1][0]} (₹${Math.round(entries[entries.length - 1][1])})`;
+      } else {
+        document.getElementById('insightBestDay').innerText = "No data";
+        document.getElementById('insightWorstDay').innerText = "No data";
+      }
+
+      // Weekly bar chart (last 7 days)
+      const chartContainer = document.getElementById('weeklyBarChart');
+      let barsHtml = '';
+      const baseline = calc.monthlyBudget / totalDaysInMonth;
+
+      for (let i = 6; i >= 0; i--) {
+        const d = currentDay - i;
+        if (d >= 1) {
+          const amt = transactions.filter(t => t.day === d).reduce((s, t) => s + t.amount, 0);
+          const heightPct = Math.min(100, Math.max(8, (amt / (baseline * 2)) * 100));
+          const isOver = amt > baseline;
+          barsHtml += `
+            <div class="bar-column">
+              <span class="bar-val">₹${Math.round(amt)}</span>
+              <div class="bar-fill ${isOver ? 'over' : ''}" style="height:${heightPct}%;"></div>
+              <span class="bar-label">D${d}</span>
+            </div>
+          `;
+        }
+      }
+      chartContainer.innerHTML = barsHtml || '<div style="color:#8E8E9B; font-size:12px;">No recent spend data</div>';
+
+      // Spend by UPI App
+      const upiContainer = document.getElementById('upiBreakdownList');
+      let upiMap = {};
+      transactions.forEach(t => {
+        const app = t.upiApp || 'Other';
+        upiMap[app] = (upiMap[app] || 0) + t.amount;
+      });
+
+      const totalUpi = Math.max(1, totalMonthSpent);
+      upiContainer.innerHTML = Object.entries(upiMap).map(([app, amt]) => {
+        const pct = Math.round((amt / totalUpi) * 100);
+        return `
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;">
+              <span style="font-weight:600;">${app}</span>
+              <span>₹${Math.round(amt)} (${pct}%)</span>
+            </div>
+            <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
+              <div style="width:${pct}%; height:100%; background:#22C55E; border-radius:3px;"></div>
+            </div>
+          </div>
+        `;
+      }).join('') || '<div style="color:#8E8E9B; font-size:12px;">No UPI transactions recorded yet.</div>';
+    }
+
+    // 4. Render Settings Page
+    function renderSettings() {
+      const nameEl = document.getElementById('profileNameDisplay');
+      if (nameEl) nameEl.innerText = profileData.name || "User";
+      const phoneEl = document.getElementById('profilePhoneDisplay');
+      if (phoneEl) phoneEl.innerText = profileData.phone || "Not provided";
+      const emailEl = document.getElementById('profileEmailDisplay');
+      if (emailEl) emailEl.innerText = profileData.email || "Not provided";
+
+      const avatarBox = document.getElementById('profileAvatarContainer');
+      if (avatarBox) {
+        if (profileData.avatar && profileData.avatar.startsWith('http')) {
+          avatarBox.innerHTML = `<img src="${profileData.avatar}" alt="Avatar" style="width:100%; height:100%; object-fit:cover;">`;
+        } else {
+          avatarBox.innerHTML = `<svg width="44" height="44" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+        }
+      }
+
+      document.getElementById('settingsBudgetVal').innerText = `₹${Math.round(monthlyBudget).toLocaleString('en-IN')}`;
+      const list = document.getElementById('settingsUpiList');
+
+      if (integratedUpiApps.length === 0) {
+        list.innerHTML = `<div style="color:#8E8E9B; font-size:12px; padding:6px 0;">No apps integrated. Tap 'Connect UPI' above to enable automated tracking.</div>`;
+      } else {
+        list.innerHTML = integratedUpiApps.map(app => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="upi-chip-dot"></span>
+              <span style="font-size:14px; font-weight:600;">${app}</span>
+            </div>
+            <button class="btn-glass-action" style="color:#EF4444; border-color:rgba(239,68,68,0.3); padding:4px 10px;" onclick="removeUpiApp('${app}')">Disconnect</button>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Modal Triggers: Add Spend
+    function openAddModal() {
+      const select = document.getElementById('txUpiApp');
+      const appOptions = integratedUpiApps.length > 0 ? integratedUpiApps : AVAILABLE_UPI_APPS.map(a => a.name);
+      select.innerHTML = appOptions.map(a => `<option value="${a}">${a}</option>`).join('') + `<option value="Other">Other UPI</option>`;
+      
+      document.getElementById('addTxModal').classList.add('show');
+      document.getElementById('txAmount').focus();
+    }
+    function closeAddModal() {
+      document.getElementById('addTxModal').classList.remove('show');
+    }
+
+    function applyPreset(amt, merchant, cat) {
+      document.getElementById('txAmount').value = amt;
+      document.getElementById('txMerchant').value = merchant;
+      if (document.getElementById('txCategory')) {
+        document.getElementById('txCategory').value = cat;
+      }
+    }
+
+    function handleSaveTx(e) {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('txAmount').value);
+      const merchant = document.getElementById('txMerchant').value.trim();
+      const upiApp = document.getElementById('txUpiApp').value;
+      const category = document.getElementById('txCategory').value;
+
+      if (!amount || amount <= 0) return;
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      transactions.unshift({
+        id: Date.now(),
+        amount: amount,
+        merchant: merchant,
+        upiApp: upiApp,
+        category: category,
+        day: currentDay,
+        time: timeStr
+      });
+
+      saveState();
+      document.getElementById('txAmount').value = '';
+      document.getElementById('txMerchant').value = '';
+      closeAddModal();
+      renderUI();
+      if (currentActiveTab === 'history') renderHistory();
+      if (currentActiveTab === 'insights') renderInsights();
+    }
+
+    // Modal Triggers: Edit/Delete Spend
+    function openEditTxModal(txId) {
+      const tx = transactions.find(t => t.id === txId);
+      if (!tx) return;
+
+      document.getElementById('editTxId').value = tx.id;
+      document.getElementById('editTxAmount').value = tx.amount;
+      document.getElementById('editTxMerchant').value = tx.merchant;
+
+      const select = document.getElementById('editTxUpiApp');
+      const appOptions = integratedUpiApps.length > 0 ? integratedUpiApps : AVAILABLE_UPI_APPS.map(a => a.name);
+      select.innerHTML = [...new Set([...appOptions, tx.upiApp, "Other"])].map(a => `<option value="${a}" ${a === tx.upiApp ? 'selected' : ''}>${a}</option>`).join('');
+
+      if (document.getElementById('editTxCategory')) {
+        document.getElementById('editTxCategory').value = tx.category || 'Food & Dining';
+      }
+
+      document.getElementById('editTxModal').classList.add('show');
+    }
+    function closeEditTxModal() {
+      document.getElementById('editTxModal').classList.remove('show');
+    }
+
+    function handleUpdateTx(e) {
+      e.preventDefault();
+      const id = parseInt(document.getElementById('editTxId').value);
+      const amt = parseFloat(document.getElementById('editTxAmount').value);
+      const merchant = document.getElementById('editTxMerchant').value.trim();
+      const upiApp = document.getElementById('editTxUpiApp').value;
+      const category = document.getElementById('editTxCategory').value;
+
+      const tx = transactions.find(t => t.id === id);
+      if (tx) {
+        tx.amount = amt;
+        tx.merchant = merchant;
+        tx.upiApp = upiApp;
+        tx.category = category;
+        saveState();
+        closeEditTxModal();
+        renderUI();
+        if (currentActiveTab === 'history') renderHistory();
+        if (currentActiveTab === 'insights') renderInsights();
+      }
+    }
+
+    function handleDeleteTx() {
+      const id = parseInt(document.getElementById('editTxId').value);
+      if (confirm("Are you sure you want to delete this spend record?")) {
+        transactions = transactions.filter(t => t.id !== id);
+        saveState();
+        closeEditTxModal();
+        renderUI();
+        if (currentActiveTab === 'history') renderHistory();
+        if (currentActiveTab === 'insights') renderInsights();
+      }
+    }
+
+    // Modal Triggers: Paste SMS
+    let currentParsedData = null;
+    function openPasteSmsModal() {
+      document.getElementById('smsInputArea').value = '';
+      previewParsedSms();
+      document.getElementById('pasteSmsModal').classList.add('show');
+      document.getElementById('smsInputArea').focus();
+    }
+    function closePasteSmsModal() {
+      document.getElementById('pasteSmsModal').classList.remove('show');
+    }
+
+    function parseSmsText(text) {
+      if (!text || !text.trim()) return null;
+      const t = text.trim();
+      const lower = t.toLowerCase();
+
+      // Check credit rejection
+      const creditWords = ["credited", "received", "refunded", "cashback", "deposited"];
+      const debitWords = ["debited", "debit", "paid", "sent", "spent", "deducted", "dr."];
+      if (creditWords.some(w => lower.includes(w)) && !debitWords.some(w => lower.includes(w))) {
+        return { isCredit: true, error: "Ignored credit message. DayLimit tracks debits." };
+      }
+
+      // Regex for Amount
+      let amt = null;
+      const amtRegexes = [
+        /(?:rs\.?|inr|₹)\s*([0-9,]+(?:\.[0-9]{1,2})?)/i,
+        /debited\s*(?:by|for)?\s*(?:rs\.?|inr|₹)?\s*([0-9,]+(?:\.[0-9]{1,2})?)/i,
+        /paid\s*(?:rs\.?|inr|₹)?\s*([0-9,]+(?:\.[0-9]{1,2})?)/i
+      ];
+      for (let r of amtRegexes) {
+        const m = t.match(r);
+        if (m && m[1]) {
+          amt = parseFloat(m[1].replace(/,/g, ''));
+          if (amt > 0) break;
+        }
+      }
+
+      // Regex for Merchant
+      let merchant = "UPI Payment";
+      const merRegexes = [
+        /(?:to\s+vpa|to)\s+([A-Za-z0-9@_.\s\-&]{2,30}?)(?=\s+(?:on|via|ref|upi|avail|bal|\.|\,))/i,
+        /paid\s+towards\s+([A-Za-z0-9@_.\s\-&]{2,30}?)(?=\s+(?:on|via|ref|upi|avail|bal|\.|\,))/i,
+        /at\s+([A-Za-z0-9@_.\s\-&]{2,30}?)(?=\s+(?:on|via|ref|upi|avail|bal|\.|\,))/i
+      ];
+      for (let r of merRegexes) {
+        const m = t.match(r);
+        if (m && m[1]) {
+          merchant = m[1].trim();
+          break;
+        }
+      }
+
+      // Inferred UPI App
+      let inferredApp = "UPI App";
+      if (lower.includes("gpay") || lower.includes("google pay")) inferredApp = "Google Pay";
+      else if (lower.includes("phonepe")) inferredApp = "PhonePe";
+      else if (lower.includes("paytm")) inferredApp = "Paytm";
+      else if (lower.includes("cred")) inferredApp = "CRED";
+      else if (lower.includes("amazon")) inferredApp = "Amazon Pay";
+      else if (lower.includes("bhim")) inferredApp = "BHIM UPI";
+
+      return {
+        amount: amt,
+        merchant: merchant,
+        upiApp: inferredApp,
+        isValid: amt !== null && amt > 0
+      };
+    }
+
+    function previewParsedSms() {
+      const text = document.getElementById('smsInputArea').value;
+      const res = parseSmsText(text);
+      const btn = document.getElementById('btnAutoTrackSms');
+      const amtEl = document.getElementById('smsExtractedAmount');
+      const merEl = document.getElementById('smsExtractedMerchant');
+      const appEl = document.getElementById('smsExtractedApp');
+      const statEl = document.getElementById('smsStatusMsg');
+
+      if (!res) {
+        amtEl.innerText = '--';
+        merEl.innerText = '--';
+        appEl.innerText = '--';
+        statEl.innerText = 'Paste an SMS or notification text above.';
+        statEl.style.color = '#9CA3AF';
+        btn.disabled = true;
+        currentParsedData = null;
+        return;
+      }
+
+      if (res.isCredit) {
+        amtEl.innerText = '--';
+        statEl.innerText = res.error;
+        statEl.style.color = '#EF4444';
+        btn.disabled = true;
+        currentParsedData = null;
+        return;
+      }
+
+      if (res.isValid) {
+        amtEl.innerText = `₹${res.amount}`;
+        merEl.innerText = res.merchant;
+        appEl.innerText = res.upiApp;
+        statEl.innerText = '✓ Valid debit transaction recognized!';
+        statEl.style.color = '#22C55E';
+        btn.disabled = false;
+        currentParsedData = res;
+      } else {
+        amtEl.innerText = '--';
+        statEl.innerText = 'Could not detect an amount. Please enter or review manually.';
+        statEl.style.color = '#F59E0B';
+        btn.disabled = true;
+        currentParsedData = null;
+      }
+    }
+
+    function confirmParsedSms() {
+      if (!currentParsedData || !currentParsedData.amount) return;
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      transactions.unshift({
+        id: Date.now(),
+        amount: currentParsedData.amount,
+        merchant: currentParsedData.merchant,
+        upiApp: currentParsedData.upiApp,
+        category: "General",
+        day: currentDay,
+        time: timeStr
+      });
+
+      saveState();
+      closePasteSmsModal();
+      renderUI();
+      if (currentActiveTab === 'history') renderHistory();
+      if (currentActiveTab === 'insights') renderInsights();
+      alert(`Tracked ₹${currentParsedData.amount} for ${currentParsedData.merchant}! Daily limit dynamically rebalanced.`);
+    }
+
+    // UPI App Management Actions
+    function renderModalUpiApps() {
+      const container = document.getElementById('modalUpiAppsList');
+      if (!container) return;
+      container.innerHTML = AVAILABLE_UPI_APPS.map(app => {
+        const isConnected = integratedUpiApps.includes(app.name);
+        return `
+          <div style="display:flex; justify-content:space-between; align-items:center; background:${isConnected ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.04)'}; border:1px solid ${isConnected ? 'rgba(34,197,94,0.35)' : 'rgba(255,255,255,0.08)'}; border-radius:12px; padding:10px 14px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${isConnected ? '#22C55E' : '#6B7280'};"></span>
+              <div>
+                <div style="font-weight:600; font-size:13px; color:#FFF;">${app.label}</div>
+                ${isConnected ? '<div style="font-size:10px; color:#22C55E; font-weight:700;">Connected &amp; Tracking</div>' : ''}
+              </div>
+            </div>
+            ${isConnected ? `
+              <button type="button" class="btn-glass-action" style="padding:4px 10px; font-size:11px; color:#EF4444; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); font-weight:700;" onclick="toggleUpiApp('${app.name}')">Disconnect</button>
+            ` : `
+              <button type="button" class="btn-glass-action" style="padding:5px 14px; font-size:12px; color:#000; background:#FFF; font-weight:700;" onclick="toggleUpiApp('${app.name}')">Connect</button>
+            `}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleUpiApp(appName) {
+      if (integratedUpiApps.includes(appName)) {
+        integratedUpiApps = integratedUpiApps.filter(a => a !== appName);
+      } else {
+        integratedUpiApps.push(appName);
+      }
+      saveState();
+      renderModalUpiApps();
+      renderUI();
+      if (currentActiveTab === 'settings') renderSettings();
+    }
+
+    function handleAddCustomUpi() {
+      const val = document.getElementById('customUpiInput').value.trim();
+      if (val) {
+        if (!integratedUpiApps.includes(val)) {
+          integratedUpiApps.push(val);
+          saveState();
+          document.getElementById('customUpiInput').value = '';
+          renderModalUpiApps();
+          renderUI();
+          if (currentActiveTab === 'settings') renderSettings();
+        }
+      }
+    }
+
+    function removeUpiApp(appName) {
+      integratedUpiApps = integratedUpiApps.filter(a => a !== appName);
+      saveState();
+      renderModalUpiApps();
+      renderUI();
+      if (currentActiveTab === 'settings') renderSettings();
+    }
+
+    function openIntegrateUpiModal() {
+      renderModalUpiApps();
+      document.getElementById('integrateUpiModal').classList.add('show');
+    }
+    function closeIntegrateUpiModal() {
+      document.getElementById('integrateUpiModal').classList.remove('show');
+    }
+
+    function openBudgetModal() {
+      document.getElementById('editBudgetValue').value = monthlyBudget;
+      document.getElementById('budgetModal').classList.add('show');
+    }
+    function closeBudgetModal() {
+      document.getElementById('budgetModal').classList.remove('show');
+    }
+
+    // Profile & Subscription Modal Handlers
+    function openEditProfileModal() {
+      document.getElementById('editProfileName').value = profileData.name || '';
+      document.getElementById('editProfilePhone').value = profileData.phone || '';
+      document.getElementById('editProfileEmail').value = profileData.email || '';
+      document.getElementById('editProfileAvatar').value = profileData.avatar || '';
+      document.getElementById('editProfileModal').classList.add('show');
+    }
+    function closeEditProfileModal() {
+      document.getElementById('editProfileModal').classList.remove('show');
+    }
+    function handleSaveProfile(e) {
+      e.preventDefault();
+      profileData.name = document.getElementById('editProfileName').value.trim();
+      profileData.phone = document.getElementById('editProfilePhone').value.trim();
+      profileData.email = document.getElementById('editProfileEmail').value.trim();
+      profileData.avatar = document.getElementById('editProfileAvatar').value.trim();
+      saveState();
+      closeEditProfileModal();
+      renderSettings();
+    }
+    function handleLogout() {
+      if (confirm("Are you sure you want to log out of DayLimit?")) {
+        profileData.name = "Guest User";
+        profileData.phone = "";
+        profileData.email = "";
+        saveState();
+        renderSettings();
+        alert("Logged out successfully.");
+      }
+    }
+
+    function openManageSubModal() {
+      document.getElementById('manageSubModal').classList.add('show');
+    }
+    function closeManageSubModal() {
+      document.getElementById('manageSubModal').classList.remove('show');
+    }
+    function handleSaveBudget(e) {
+      e.preventDefault();
+      const val = parseFloat(document.getElementById('editBudgetValue').value);
+      if (val && val > 0) {
+        monthlyBudget = val;
+        saveState();
+        closeBudgetModal();
+        renderUI();
+        if (currentActiveTab === 'settings') renderSettings();
+      }
+    }
+
+    function openDayModal(day, isCompleted, isToday, isRemaining, calc, info) {
+      const modal = document.getElementById('dayDetailModal');
+      document.getElementById('modalDayDate').innerText = `${day} ${monthNames[currentMonth]} ${currentYear}`;
+
+      if (isToday) {
+        document.getElementById('modalDayTitle').innerText = "Today's Limit";
+        document.getElementById('modalDayLimit').innerText = `₹${Math.round(calc.dailyLimitToday)}`;
+        document.getElementById('modalDaySpent').innerText = `₹${Math.round(calc.spentToday)}`;
+        document.getElementById('modalDayBalLabel').innerText = "Remaining:";
+        const balEl = document.getElementById('modalDayBal');
+        balEl.innerText = `₹${Math.round(calc.remainingToday)}`;
+        balEl.style.color = calc.isOverToday ? '#EF4444' : '#22C55E';
+        document.getElementById('modalDayExpl').innerText = "Limit recalculates dynamically on every transaction.";
+      } else if (isCompleted) {
+        document.getElementById('modalDayTitle').innerText = `Day ${day} Summary`;
+        document.getElementById('modalDayLimit').innerText = `₹${Math.round(info.limit)}`;
+        document.getElementById('modalDaySpent').innerText = `₹${Math.round(info.spent)}`;
+        document.getElementById('modalDayBalLabel').innerText = info.remaining >= 0 ? "Saved:" : "Overspent:";
+        const balEl = document.getElementById('modalDayBal');
+        balEl.innerText = info.remaining >= 0 ? `+₹${Math.round(info.remaining)}` : `-₹${Math.round(Math.abs(info.remaining))}`;
+        balEl.style.color = info.isOver ? '#EF4444' : '#22C55E';
+        document.getElementById('modalDayExpl').innerText = info.remaining >= 0
+          ? `Savings of ₹${Math.round(info.remaining)} were rolled over equally across subsequent days.`
+          : `Overspend of ₹${Math.round(Math.abs(info.remaining))} was deducted equally from subsequent days.`;
+      } else {
+        const futureDays = Math.max(1, totalDaysInMonth - currentDay);
+        const projected = calc.remainingMonthBudget > 0 ? (calc.remainingMonthBudget / futureDays) : 0;
+        document.getElementById('modalDayTitle').innerText = `Day ${day} Projected`;
+        document.getElementById('modalDayLimit').innerText = `₹${Math.round(projected)}`;
+        document.getElementById('modalDaySpent').innerText = `₹0`;
+        document.getElementById('modalDayBalLabel').innerText = "Available:";
+        const balEl = document.getElementById('modalDayBal');
+        balEl.innerText = `₹${Math.round(projected)}`;
+        balEl.style.color = '#D1D5DB';
+        document.getElementById('modalDayExpl').innerText = "Future projected daily limit based on current dynamic rebalancing.";
+      }
+
+      modal.classList.add('show');
+    }
+
+    function closeDayModal() {
+      document.getElementById('dayDetailModal').classList.remove('show');
+    }
+
+    function handleResetMonth() {
+      if (confirm("Reset current month transactions?")) {
+        transactions = [];
+        saveState();
+        renderUI();
+        if (currentActiveTab === 'settings') renderSettings();
+      }
+    }
+
+    function handleResetAll() {
+      if (confirm("Reset all data back to factory defaults?")) {
+        localStorage.clear();
+        monthlyBudget = 15000;
+        integratedUpiApps = [];
+        transactions = [];
+        saveState();
+        renderUI();
+        if (currentActiveTab === 'settings') renderSettings();
+      }
+    }
+
+    // Initialize application and route
+    syncTabFromHash();
+    renderUI();
+  </script>
+</body>
+</html>
