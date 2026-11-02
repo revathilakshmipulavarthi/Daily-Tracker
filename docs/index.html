@@ -472,6 +472,7 @@
     }
 
     .nav-item {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -484,7 +485,7 @@
       border: none;
       background: none;
       padding: 0;
-      transition: color 0.15s ease;
+      transition: color 0.2s ease, transform 0.2s cubic-bezier(0.2, 0, 0, 1);
       -webkit-tap-highlight-color: transparent;
       outline: none;
     }
@@ -497,18 +498,90 @@
       align-items: center;
       justify-content: center;
       background: transparent;
-      transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
+      border: 1px solid transparent;
+      transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
       color: #8E8E9B;
+      position: relative;
     }
 
+    /* Active State: Sleek Frosted Glass Pill */
     .nav-item.active .nav-indicator {
-      background: #262632;
+      background: rgba(38, 38, 50, 0.95);
+      border-color: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
     }
 
     .nav-item.active {
       color: #FFFFFF;
       font-weight: 700;
+    }
+
+    /* Glassmorphic Hover State for Icons */
+    .nav-item:hover .nav-indicator {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.24);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+      color: #FFFFFF;
+    }
+
+    .nav-item.active:hover .nav-indicator {
+      background: rgba(52, 52, 70, 0.95);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .nav-item:hover .nav-label {
+      color: #FFFFFF;
+      transition: color 0.2s ease;
+    }
+
+    /* Floating Glassmorphic Hover Tab above each icon */
+    .nav-hover-tab {
+      position: absolute;
+      top: -34px;
+      left: 50%;
+      transform: translateX(-50%) translateY(6px) scale(0.92);
+      background: rgba(18, 18, 24, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #FFFFFF;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      z-index: 50;
+      letter-spacing: 0.2px;
+    }
+
+    .nav-hover-tab::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 7px;
+      height: 7px;
+      background: rgba(18, 18, 24, 0.82);
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-item:hover .nav-hover-tab {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
     }
 
     .nav-icon {
@@ -984,6 +1057,7 @@
     <!-- Bottom Navigation Bar with deep linking & data-tabs (Material 3 Style) -->
     <nav class="bottom-nav">
       <button class="nav-item active" data-tab="home" onclick="handleNavClick('home')">
+        <span class="nav-hover-tab">Home</span>
         <span class="nav-indicator">
           <span class="nav-icon nav-icon-filled">
             <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -995,6 +1069,7 @@
         <span class="nav-label">Home</span>
       </button>
       <button class="nav-item" data-tab="history" onclick="handleNavClick('history')">
+        <span class="nav-hover-tab">History</span>
         <span class="nav-indicator">
           <span class="nav-icon nav-icon-filled">
             <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
@@ -1006,6 +1081,7 @@
         <span class="nav-label">History</span>
       </button>
       <button class="nav-item" data-tab="insights" onclick="handleNavClick('insights')">
+        <span class="nav-hover-tab">Insights</span>
         <span class="nav-indicator">
           <span class="nav-icon nav-icon-filled">
             <svg viewBox="0 0 24 24"><rect x="5" y="10" width="3.2" height="9" rx="1.2"/><rect x="10.4" y="5" width="3.2" height="14" rx="1.2"/><rect x="15.8" y="12" width="3.2" height="7" rx="1.2"/></svg>
@@ -1017,6 +1093,7 @@
         <span class="nav-label">Insights</span>
       </button>
       <button class="nav-item" data-tab="settings" onclick="handleNavClick('settings')">
+        <span class="nav-hover-tab">Settings</span>
         <span class="nav-indicator">
           <span class="nav-icon nav-icon-filled">
             <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
