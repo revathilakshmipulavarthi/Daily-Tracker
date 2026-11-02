@@ -511,8 +511,8 @@
 
     /* Active Pill Item matching the reference image */
     .nav-item.active .nav-indicator {
-      background: rgba(255, 255, 255, 0.16);
-      border: 1px solid rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.32);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.35);
@@ -520,25 +520,25 @@
     }
 
     .nav-item:hover .nav-indicator {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.26);
       color: #FFFFFF;
-      transform: scale(1.05);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.28);
     }
 
     .nav-item.active:hover .nav-indicator {
-      background: rgba(255, 255, 255, 0.22);
-      border-color: rgba(255, 255, 255, 0.36);
-      transform: scale(1.02);
+      background: rgba(255, 255, 255, 0.24);
+      border-color: rgba(255, 255, 255, 0.38);
     }
 
+    .nav-item:hover,
     .nav-item.active {
       color: #FFFFFF;
     }
 
     .nav-icon {
-      width: 25px;
-      height: 25px;
+      width: 24px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -547,14 +547,16 @@
     }
 
     .nav-icon svg {
-      width: 25px;
-      height: 25px;
+      width: 24px;
+      height: 24px;
       display: block;
     }
 
     .nav-icon-filled { display: none; }
     .nav-icon-outline { display: flex; }
+    .nav-item:hover .nav-icon-filled,
     .nav-item.active .nav-icon-filled { display: flex; }
+    .nav-item:hover .nav-icon-outline,
     .nav-item.active .nav-icon-outline { display: none; }
 
     .nav-label {
@@ -1050,10 +1052,10 @@
         <span class="nav-hover-tab">Home</span>
         <span class="nav-indicator">
           <span class="nav-icon nav-icon-filled">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M11.2 2.8a2 2 0 0 1 1.6 0l8 6.7a1.5 1.5 0 0 1 .7 1.35V19.5a2 2 0 0 1-2 2H15v-7a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v7H4.5a2 2 0 0 1-2-2v-8.65c0-.5.25-1 .7-1.35z"/></svg>
+            <svg viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M11.2 2.8a2 2 0 0 1 1.6 0l8 6.6a1.5 1.5 0 0 1 .7 1.3V18.5a2 2 0 0 1-2 2H15v-6a1.5 1.5 0 0 0-1.5-1.5h-3A1.5 1.5 0 0 0 9 14.5v6H5.5a2 2 0 0 1-2-2v-7.8c0-.5.25-1 .7-1.3z"/></svg>
           </span>
           <span class="nav-icon nav-icon-outline">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M9.5 21.5v-7a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v7"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M9.5 20.5v-6a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v6"/></svg>
           </span>
         </span>
       </button>
@@ -1061,10 +1063,10 @@
         <span class="nav-hover-tab">History</span>
         <span class="nav-indicator">
           <span class="nav-icon nav-icon-filled">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M12 7.5V12l3.5 2"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5" stroke="currentColor" stroke-width="2.4"/><polygon points="3.5 3.5, 3.5 9.5, 9.5 9.5" fill="currentColor"/><path d="M12 6.8V12l3.6 2.4" stroke="currentColor" stroke-width="2.4"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg>
           </span>
           <span class="nav-icon nav-icon-outline">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3.5 2"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 6.8V12l3.6 2.4"/></svg>
           </span>
         </span>
       </button>
@@ -1072,10 +1074,10 @@
         <span class="nav-hover-tab">Insights</span>
         <span class="nav-indicator">
           <span class="nav-icon nav-icon-filled">
-            <svg viewBox="0 0 24 24"><rect x="4.5" y="11" width="3" height="9.5" rx="1.5" fill="currentColor"/><rect x="10.5" y="4" width="3" height="16.5" rx="1.5" fill="currentColor"/><rect x="16.5" y="8" width="3" height="12.5" rx="1.5" fill="currentColor"/></svg>
+            <svg viewBox="0 0 24 24"><rect x="4.5" y="11.5" width="3" height="9" rx="1.5" fill="currentColor"/><rect x="10.5" y="3.5" width="3" height="17" rx="1.5" fill="currentColor"/><rect x="16.5" y="8.5" width="3" height="12" rx="1.5" fill="currentColor"/></svg>
           </span>
           <span class="nav-icon nav-icon-outline">
-            <svg viewBox="0 0 24 24"><rect x="4.5" y="11" width="3" height="9.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="10.5" y="4" width="3" height="16.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="16.5" y="8" width="3" height="12.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+            <svg viewBox="0 0 24 24"><rect x="4.5" y="11.5" width="3" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="10.5" y="3.5" width="3" height="17" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="16.5" y="8.5" width="3" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
           </span>
         </span>
       </button>
@@ -1083,10 +1085,10 @@
         <span class="nav-hover-tab">Settings</span>
         <span class="nav-indicator">
           <span class="nav-icon nav-icon-filled">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg>
+            <svg viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M18.8 14.7c.1.5.3 1 .7 1.4l.1.1c.6.6.6 1.6 0 2.2-.6.6-1.6.6-2.2 0l-.1-.1c-.4-.4-.9-.6-1.4-.5-.5.1-.9.5-1 1v.1c0 .9-.8 1.6-1.7 1.6h-2.4c-.9 0-1.7-.7-1.7-1.6v-.1c-.1-.5-.5-.9-1-1-.5-.1-1 .1-1.4.5l-.1.1c-.6.6-1.6.6-2.2 0-.6-.6-.6-1.6 0-2.2l.1-.1c.4-.4.6-.9.5-1.4-.1-.5-.5-.9-1-1h-.1c-.9 0-1.6-.7-1.6-1.6v-.2c0-.9.7-1.6 1.6-1.6h.1c.5-.1.9-.5 1-1 .1-.5-.1-1-.5-1.4l-.1-.1c-.6-.6-.6-1.6 0-2.2.6-.6 1.6-.6 2.2 0l.1.1c.4.4.9.6 1.4.5.5-.1.9-.5 1-1v-.1c0-.9.8-1.6 1.7-1.6h2.4c.9 0 1.7.7 1.7 1.6v.1c.1.5.5.9 1 1 .5.1 1-.1 1.4-.5l.1-.1c.6-.6 1.6-.6 2.2 0 .6.6.6 1.6 0 2.2l-.1.1c-.4.4-.6.9-.5 1.4.1.5.5.9 1 1h.1c.9 0 1.6.7 1.6 1.6v.2c0 .9-.7 1.6-1.6 1.6h-.1c-.5.1-.9.5-1 1zM12 8.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4z"/></svg>
           </span>
           <span class="nav-icon nav-icon-outline">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.8 14.7c.1.5.3 1 .7 1.4l.1.1c.6.6.6 1.6 0 2.2-.6.6-1.6.6-2.2 0l-.1-.1c-.4-.4-.9-.6-1.4-.5-.5.1-.9.5-1 1v.1c0 .9-.8 1.6-1.7 1.6h-2.4c-.9 0-1.7-.7-1.7-1.6v-.1c-.1-.5-.5-.9-1-1-.5-.1-1 .1-1.4.5l-.1.1c-.6.6-1.6.6-2.2 0-.6-.6-.6-1.6 0-2.2l.1-.1c.4-.4.6-.9.5-1.4-.1-.5-.5-.9-1-1h-.1c-.9 0-1.6-.7-1.6-1.6v-.2c0-.9.7-1.6 1.6-1.6h.1c.5-.1.9-.5 1-1 .1-.5-.1-1-.5-1.4l-.1-.1c-.6-.6-.6-1.6 0-2.2.6-.6 1.6-.6 2.2 0l.1.1c.4.4.9.6 1.4.5.5-.1.9-.5 1-1v-.1c0-.9.8-1.6 1.7-1.6h2.4c.9 0 1.7.7 1.7 1.6v.1c.1.5.5.9 1 1 .5.1 1-.1 1.4-.5l.1-.1c.6-.6 1.6-.6 2.2 0 .6.6.6 1.6 0 2.2l-.1.1c-.4.4-.6.9-.5 1.4.1.5.5.9 1 1h.1c.9 0 1.6.7 1.6 1.6v.2c0 .9-.7 1.6-1.6 1.6h-.1c-.5.1-.9.5-1 1z"/><circle cx="12" cy="12" r="3.2"/></svg>
           </span>
         </span>
       </button>

@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -183,6 +184,7 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
                                         else R.drawable.ic_nav_home
                                     ),
                                     contentDescription = "Home",
+                                    modifier = Modifier.size(24.dp),
                                     tint = if (currentTab == ScreenTab.HOME) Color.White else Color(0xB3FFFFFF)
                                 )
                             },
@@ -199,6 +201,7 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
                                         else R.drawable.ic_nav_history
                                     ),
                                     contentDescription = "History",
+                                    modifier = Modifier.size(24.dp),
                                     tint = if (currentTab == ScreenTab.HISTORY) Color.White else Color(0xB3FFFFFF)
                                 )
                             },
@@ -215,6 +218,7 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
                                         else R.drawable.ic_nav_insights
                                     ),
                                     contentDescription = "Insights",
+                                    modifier = Modifier.size(24.dp),
                                     tint = if (currentTab == ScreenTab.INSIGHTS) Color.White else Color(0xB3FFFFFF)
                                 )
                             },
@@ -231,6 +235,7 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
                                         else R.drawable.ic_nav_settings
                                     ),
                                     contentDescription = "Settings",
+                                    modifier = Modifier.size(24.dp),
                                     tint = if (currentTab == ScreenTab.SETTINGS) Color.White else Color(0xB3FFFFFF)
                                 )
                             },
