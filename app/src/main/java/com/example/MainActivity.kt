@@ -60,6 +60,7 @@ import com.example.logic.CurrencyFormatter
 import com.example.logic.NotificationHelper
 import com.example.model.Category
 import com.example.model.UPIApp
+import com.example.ui.screens.AuthScreen
 import com.example.ui.screens.EditTransactionSheet
 import com.example.ui.screens.HistoryScreen
 import com.example.ui.screens.HomeScreen
@@ -131,6 +132,22 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
                 }
             }
         }
+    }
+
+    // Authentication flow: First-time sign up or Returning login (Mobile / Email OTP)
+    if (!settings.isLoggedIn) {
+        AuthScreen(
+            initialIsSignUp = !settings.isSignedUp,
+            defaultEmail = settings.userEmail,
+            defaultPhone = settings.userPhone,
+            onSignUpSuccess = { name, phone, email ->
+                viewModel.registerUser(name, phone, email)
+            },
+            onLoginSuccess = { phoneOrEmail, isEmail ->
+                viewModel.loginUser(phoneOrEmail, isEmail)
+            }
+        )
+        return
     }
 
     // If onboarding is not completed, show OnboardingScreen

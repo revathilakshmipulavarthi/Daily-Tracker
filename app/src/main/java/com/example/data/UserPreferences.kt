@@ -10,6 +10,8 @@ data class UserSettings(
     val monthlyBudget: Double = 15000.0,
     val lastConfiguredYearMonth: String = "",
     val isOnboardingDone: Boolean = false,
+    val isLoggedIn: Boolean = false,
+    val isSignedUp: Boolean = false,
     val notify50Percent: Boolean = true,
     val notify80Percent: Boolean = true,
     val notify100Percent: Boolean = true,
@@ -21,10 +23,10 @@ data class UserSettings(
     val userName: String = "Revathi Lakshmi",
     val userPhone: String = "+91 98765 43210",
     val userEmail: String = "revathilakshmipulavarthi@gmail.com",
-    val subscriptionPlan: String = "Pro Monthly",
-    val subscriptionPrice: String = "₹99/month",
+    val subscriptionPlan: String = "Free Edition",
+    val subscriptionPrice: String = "Free",
     val isSubscribed: Boolean = true,
-    val subscriptionRenewal: String = "Renews 29 Nov 2026"
+    val subscriptionRenewal: String = "Lifetime Free"
 )
 
 class UserPreferences(context: Context) {
@@ -44,6 +46,8 @@ class UserPreferences(context: Context) {
             monthlyBudget = prefs.getFloat(KEY_MONTHLY_BUDGET, 15000f).toDouble(),
             lastConfiguredYearMonth = prefs.getString(KEY_LAST_MONTH, "") ?: "",
             isOnboardingDone = prefs.getBoolean(KEY_ONBOARDING_DONE, false),
+            isLoggedIn = prefs.getBoolean(KEY_IS_LOGGED_IN, false),
+            isSignedUp = prefs.getBoolean(KEY_IS_SIGNED_UP, false),
             notify50Percent = prefs.getBoolean(KEY_NOTIFY_50, true),
             notify80Percent = prefs.getBoolean(KEY_NOTIFY_80, true),
             notify100Percent = prefs.getBoolean(KEY_NOTIFY_100, true),
@@ -55,10 +59,58 @@ class UserPreferences(context: Context) {
             userName = prefs.getString(KEY_USER_NAME, "Revathi Lakshmi") ?: "Revathi Lakshmi",
             userPhone = prefs.getString(KEY_USER_PHONE, "+91 98765 43210") ?: "+91 98765 43210",
             userEmail = prefs.getString(KEY_USER_EMAIL, "revathilakshmipulavarthi@gmail.com") ?: "revathilakshmipulavarthi@gmail.com",
-            subscriptionPlan = prefs.getString(KEY_SUB_PLAN, "Pro Monthly") ?: "Pro Monthly",
-            subscriptionPrice = prefs.getString(KEY_SUB_PRICE, "₹99/month") ?: "₹99/month",
+            subscriptionPlan = prefs.getString(KEY_SUB_PLAN, "Free Edition") ?: "Free Edition",
+            subscriptionPrice = prefs.getString(KEY_SUB_PRICE, "Free") ?: "Free",
             isSubscribed = prefs.getBoolean(KEY_IS_SUBSCRIBED, true),
-            subscriptionRenewal = prefs.getString(KEY_SUB_RENEWAL, "Renews 29 Nov 2026") ?: "Renews 29 Nov 2026"
+            subscriptionRenewal = prefs.getString(KEY_SUB_RENEWAL, "Lifetime Free") ?: "Lifetime Free"
+        )
+    }
+
+    fun registerUser(name: String, phone: String, email: String) {
+        prefs.edit()
+            .putBoolean(KEY_IS_LOGGED_IN, true)
+            .putBoolean(KEY_IS_SIGNED_UP, true)
+            .putString(KEY_USER_NAME, name)
+            .putString(KEY_USER_PHONE, phone)
+            .putString(KEY_USER_EMAIL, email)
+            .apply()
+        _settings.value = _settings.value.copy(
+            isLoggedIn = true,
+            isSignedUp = true,
+            userName = name,
+            userPhone = phone,
+            userEmail = email
+        )
+    }
+
+    fun loginUser(phoneOrEmail: String, isEmail: Boolean) {
+        val editor = prefs.edit().putBoolean(KEY_IS_LOGGED_IN, true)
+        var updatedName = _settings.value.userName
+        var updatedEmail = _settings.value.userEmail
+        var updatedPhone = _settings.value.userPhone
+
+        if (isEmail) {
+            editor.putString(KEY_USER_EMAIL, phoneOrEmail)
+            updatedEmail = phoneOrEmail
+            if (updatedName.isBlank() || updatedName == "Guest User") {
+                updatedName = phoneOrEmail.substringBefore("@").replace(".", " ")
+                    .split(" ").joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+                editor.putString(KEY_USER_NAME, updatedName)
+            }
+        } else {
+            editor.putString(KEY_USER_PHONE, phoneOrEmail)
+            updatedPhone = phoneOrEmail
+            if (updatedName.isBlank() || updatedName == "Guest User") {
+                updatedName = "User ${phoneOrEmail.takeLast(4)}"
+                editor.putString(KEY_USER_NAME, updatedName)
+            }
+        }
+        editor.apply()
+        _settings.value = _settings.value.copy(
+            isLoggedIn = true,
+            userName = updatedName,
+            userEmail = updatedEmail,
+            userPhone = updatedPhone
         )
     }
 
@@ -77,14 +129,10 @@ class UserPreferences(context: Context) {
 
     fun logout() {
         prefs.edit()
-            .putString(KEY_USER_NAME, "Guest User")
-            .putString(KEY_USER_PHONE, "")
-            .putString(KEY_USER_EMAIL, "")
+            .putBoolean(KEY_IS_LOGGED_IN, false)
             .apply()
         _settings.value = _settings.value.copy(
-            userName = "Guest User",
-            userPhone = "",
-            userEmail = ""
+            isLoggedIn = false
         )
     }
 
@@ -168,6 +216,8 @@ class UserPreferences(context: Context) {
     }
 
     companion object {
+        private const val KEY_IS_LOGGED_IN = "is_logged_in"
+        private const val KEY_IS_SIGNED_UP = "is_signed_up"
         private const val KEY_MONTHLY_BUDGET = "monthly_budget"
         private const val KEY_LAST_MONTH = "last_month"
         private const val KEY_ONBOARDING_DONE = "onboarding_done"

@@ -477,6 +477,16 @@ class DayLimitViewModel(application: Application) : AndroidViewModel(application
         return sb.toString()
     }
 
+    fun registerUser(name: String, phone: String, email: String) {
+        userPrefs.registerUser(name, phone, email)
+        emitToast("Welcome, $name! Account created.")
+    }
+
+    fun loginUser(phoneOrEmail: String, isEmail: Boolean) {
+        userPrefs.loginUser(phoneOrEmail, isEmail)
+        emitToast("Logged in successfully")
+    }
+
     fun updateProfile(name: String, phone: String, email: String) {
         userPrefs.updateProfile(name, phone, email)
         emitToast("Profile details updated")

@@ -1345,24 +1345,84 @@
     </div>
   </div>
 
-  <!-- Subscription Plan Modal -->
-  <div class="modal-backdrop" id="manageSubModal" onclick="closeManageSubModal()">
-    <div class="modal-card" onclick="event.stopPropagation()">
-      <div class="modal-title">Subscription Plan Details</div>
-      <div class="modal-sub">DayLimit is a subscription-based financial management app</div>
-      
-      <div style="background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.3); border-radius:14px; padding:16px; margin:14px 0;">
-        <div style="font-size:16px; font-weight:800; color:#FFFFFF;">DayLimit Pro Membership</div>
-        <div style="font-size:18px; font-weight:900; color:#22C55E; margin:6px 0;">₹99 / month (Rs 99/- per month)</div>
-        <div style="font-size:12px; color:#D1D5DB;">Status: <strong>Active</strong> • Auto-renews on 29 Nov 2026</div>
-        <div style="font-size:11px; color:#9CA3AF; margin-top:4px;">Billing via: UPI AutoPay</div>
+  <!-- Authentication Modal (Sign Up / Login with Mobile OTP or Email OTP) -->
+  <div class="modal-backdrop" id="authModal" style="z-index: 9999;">
+    <div class="modal-card" style="max-width: 360px;" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:center; margin-bottom:12px;">
+        <div style="width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.05)); border:1px solid rgba(34,197,94,0.3); display:flex; align-items:center; justify-content:center;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="#22C55E">
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+          </svg>
+        </div>
       </div>
 
-      <p style="font-size:12px; color:#9CA3AF; line-height:16px; margin-bottom:14px;">
-        Your subscription unlocks automated UPI spend tracking, intelligent dynamic daily rebalancing, spillover calculations, and detailed analytics.
-      </p>
+      <div class="modal-title" id="authModalTitle" style="text-align:center;">Create Your Account</div>
+      <div class="modal-sub" id="authModalSub" style="text-align:center; margin-bottom:14px;">Sign up with Mobile OTP or Email OTP to protect your manual budget</div>
 
-      <button type="button" class="btn-submit" onclick="closeManageSubModal()">Done</button>
+      <!-- Sign Up vs Login Switcher -->
+      <div style="display:flex; background:rgba(255,255,255,0.05); border-radius:12px; padding:3px; margin-bottom:14px; border:1px solid rgba(255,255,255,0.08);">
+        <button type="button" id="tabSignUpBtn" class="tx-type-tab active-upi" style="flex:1; padding:8px; font-size:12px; font-weight:700;" onclick="switchAuthMode(true)">Sign Up</button>
+        <button type="button" id="tabLoginBtn" class="tx-type-tab" style="flex:1; padding:8px; font-size:12px; font-weight:700;" onclick="switchAuthMode(false)">Log In</button>
+      </div>
+
+      <!-- Auth Method Selector: Mobile OTP vs Email OTP -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
+        <button type="button" id="authMethodPhoneBtn" class="preset-btn" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px; font-weight:700; border-color:#22C55E; background:rgba(34,197,94,0.12); color:#22C55E;" onclick="setAuthMethod('phone')">
+          <span>📱</span>
+          <span>Mobile OTP</span>
+        </button>
+        <button type="button" id="authMethodEmailBtn" class="preset-btn" style="display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 10px; font-weight:700; border-color:rgba(255,255,255,0.15); background:rgba(255,255,255,0.04); color:#9CA3AF;" onclick="setAuthMethod('email')">
+          <span>✉️</span>
+          <span>Email OTP</span>
+        </button>
+      </div>
+
+      <!-- Step 1: Input Details & Send OTP -->
+      <div id="authStep1">
+        <form onsubmit="handleSendOtp(event)">
+          <div id="authNameGroup" style="margin-bottom:12px;">
+            <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Full Name</div>
+            <input class="input-field" type="text" id="authNameInput" placeholder="Enter your name" style="margin-bottom:0;">
+          </div>
+
+          <div id="authPhoneGroup" style="margin-bottom:14px;">
+            <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Mobile Number</div>
+            <div style="display:flex; gap:8px;">
+              <span style="display:flex; align-items:center; padding:0 12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:12px; font-size:13px; font-weight:700; color:#E5E7EB;">+91</span>
+              <input class="input-field" type="tel" id="authPhoneInput" placeholder="98765 43210" maxlength="10" style="margin-bottom:0; flex:1;">
+            </div>
+          </div>
+
+          <div id="authEmailGroup" style="margin-bottom:14px; display:none;">
+            <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Email Address</div>
+            <input class="input-field" type="email" id="authEmailInput" placeholder="name@example.com" style="margin-bottom:0;">
+          </div>
+
+          <button type="submit" class="btn-submit" style="margin-top:4px;">Send Verification OTP</button>
+        </form>
+      </div>
+
+      <!-- Step 2: Verify OTP -->
+      <div id="authStep2" style="display:none;">
+        <div style="background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.25); border-radius:12px; padding:12px; margin-bottom:14px; text-align:center;">
+          <div style="font-size:11px; color:#9CA3AF;">OTP sent to:</div>
+          <div style="font-size:14px; font-weight:700; color:#FFFFFF; margin:2px 0;" id="authSentTargetDisplay">+91 98765 43210</div>
+          <div style="font-size:11px; color:#22C55E; font-weight:600; margin-top:4px;">Demo Verification Code: <strong>1234</strong></div>
+        </div>
+
+        <form onsubmit="handleVerifyOtp(event)">
+          <div style="font-size:11px; color:#9CA3AF; margin-bottom:6px; text-align:center;">Enter 4-Digit OTP</div>
+          <input class="input-field" type="text" id="authOtpInput" placeholder="• • • •" maxlength="4" style="text-align:center; font-size:22px; letter-spacing:8px; font-weight:800; color:#22C55E; margin-bottom:10px;" required autofocus>
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; font-size:11px;">
+            <span style="color:#9CA3AF;" id="authTimerDisplay">Resend in 30s</span>
+            <button type="button" id="authResendBtn" style="background:none; border:none; color:#22C55E; font-weight:700; cursor:pointer; font-size:11px; display:none;" onclick="handleResendOtp()">Resend OTP</button>
+          </div>
+
+          <button type="submit" class="btn-submit" style="margin-bottom:8px;">Verify &amp; Continue</button>
+          <button type="button" class="btn-close" onclick="backToAuthStep1()">Change Number / Email</button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -1385,6 +1445,9 @@
       price: "₹99 / month",
       avatar: ""
     };
+
+    let isLoggedIn = localStorage.getItem('daylimit_logged_in') === 'true';
+    let isSignedUp = localStorage.getItem('daylimit_signed_up') === 'true';
 
     let currentSelectedFilter = null;
     let currentActiveTab = 'home';
@@ -1413,6 +1476,8 @@
         localStorage.setItem('daylimit_upi_apps', JSON.stringify(integratedUpiApps));
         localStorage.setItem('daylimit_txs', JSON.stringify(transactions));
         localStorage.setItem('daylimit_profile', JSON.stringify(profileData));
+        localStorage.setItem('daylimit_logged_in', isLoggedIn ? 'true' : 'false');
+        localStorage.setItem('daylimit_signed_up', isSignedUp ? 'true' : 'false');
       } catch (e) {
         console.warn("Storage save error", e);
       }
@@ -2301,22 +2366,191 @@
       closeEditProfileModal();
       renderSettings();
     }
-    function handleLogout() {
-      if (confirm("Are you sure you want to log out of DayLimit?")) {
-        profileData.name = "Guest User";
-        profileData.phone = "";
-        profileData.email = "";
-        saveState();
-        renderSettings();
-        alert("Logged out successfully.");
+    let authState = {
+      isSignUp: !isSignedUp,
+      method: 'phone', // 'phone' or 'email'
+      sentTarget: '',
+      resendTimer: null,
+      countdown: 30
+    };
+
+    function showAuthModal(signUpMode) {
+      authState.isSignUp = (signUpMode !== undefined) ? signUpMode : !isSignedUp;
+      switchAuthMode(authState.isSignUp);
+      setAuthMethod('phone');
+      backToAuthStep1();
+      document.getElementById('authModal').classList.add('show');
+    }
+
+    function switchAuthMode(isSignUp) {
+      authState.isSignUp = isSignUp;
+      const titleEl = document.getElementById('authModalTitle');
+      const subEl = document.getElementById('authModalSub');
+      const nameGroup = document.getElementById('authNameGroup');
+      const nameInput = document.getElementById('authNameInput');
+      const signUpTab = document.getElementById('tabSignUpBtn');
+      const loginTab = document.getElementById('tabLoginBtn');
+
+      if (isSignUp) {
+        titleEl.innerText = "Create Your Account";
+        subEl.innerText = "Sign up with Mobile OTP or Email OTP to protect your manual budget";
+        nameGroup.style.display = "block";
+        nameInput.required = true;
+        signUpTab.className = "tx-type-tab active-upi";
+        loginTab.className = "tx-type-tab";
+      } else {
+        titleEl.innerText = "Welcome Back";
+        subEl.innerText = "Log in using Mobile OTP or Email OTP to access your expenses";
+        nameGroup.style.display = "none";
+        nameInput.required = false;
+        signUpTab.className = "tx-type-tab";
+        loginTab.className = "tx-type-tab active-upi";
       }
     }
 
-    function openManageSubModal() {
-      document.getElementById('manageSubModal').classList.add('show');
+    function setAuthMethod(method) {
+      authState.method = method;
+      const phoneBtn = document.getElementById('authMethodPhoneBtn');
+      const emailBtn = document.getElementById('authMethodEmailBtn');
+      const phoneGroup = document.getElementById('authPhoneGroup');
+      const emailGroup = document.getElementById('authEmailGroup');
+      const phoneInput = document.getElementById('authPhoneInput');
+      const emailInput = document.getElementById('authEmailInput');
+
+      if (method === 'phone') {
+        phoneBtn.style.borderColor = "#22C55E";
+        phoneBtn.style.background = "rgba(34,197,94,0.12)";
+        phoneBtn.style.color = "#22C55E";
+
+        emailBtn.style.borderColor = "rgba(255,255,255,0.15)";
+        emailBtn.style.background = "rgba(255,255,255,0.04)";
+        emailBtn.style.color = "#9CA3AF";
+
+        phoneGroup.style.display = "block";
+        phoneInput.required = true;
+        emailGroup.style.display = "none";
+        emailInput.required = false;
+      } else {
+        emailBtn.style.borderColor = "#22C55E";
+        emailBtn.style.background = "rgba(34,197,94,0.12)";
+        emailBtn.style.color = "#22C55E";
+
+        phoneBtn.style.borderColor = "rgba(255,255,255,0.15)";
+        phoneBtn.style.background = "rgba(255,255,255,0.04)";
+        phoneBtn.style.color = "#9CA3AF";
+
+        emailGroup.style.display = "block";
+        emailInput.required = true;
+        phoneGroup.style.display = "none";
+        phoneInput.required = false;
+      }
     }
-    function closeManageSubModal() {
-      document.getElementById('manageSubModal').classList.remove('show');
+
+    function handleSendOtp(e) {
+      e.preventDefault();
+      let target = "";
+      if (authState.method === 'phone') {
+        const phone = document.getElementById('authPhoneInput').value.trim();
+        if (!phone || phone.length < 10) {
+          alert("Please enter a valid 10-digit mobile number");
+          return;
+        }
+        target = "+91 " + phone;
+      } else {
+        const email = document.getElementById('authEmailInput').value.trim();
+        if (!email || !email.includes('@')) {
+          alert("Please enter a valid email address");
+          return;
+        }
+        target = email;
+      }
+
+      authState.sentTarget = target;
+      document.getElementById('authSentTargetDisplay').innerText = target;
+      document.getElementById('authStep1').style.display = "none";
+      document.getElementById('authStep2').style.display = "block";
+      document.getElementById('authOtpInput').value = "";
+      document.getElementById('authOtpInput').focus();
+
+      startResendCountdown();
+    }
+
+    function startResendCountdown() {
+      if (authState.resendTimer) clearInterval(authState.resendTimer);
+      authState.countdown = 30;
+      const timerDisplay = document.getElementById('authTimerDisplay');
+      const resendBtn = document.getElementById('authResendBtn');
+      timerDisplay.style.display = "inline";
+      resendBtn.style.display = "none";
+      timerDisplay.innerText = `Resend in ${authState.countdown}s`;
+
+      authState.resendTimer = setInterval(() => {
+        authState.countdown--;
+        if (authState.countdown <= 0) {
+          clearInterval(authState.resendTimer);
+          timerDisplay.style.display = "none";
+          resendBtn.style.display = "inline";
+        } else {
+          timerDisplay.innerText = `Resend in ${authState.countdown}s`;
+        }
+      }, 1000);
+    }
+
+    function handleResendOtp() {
+      startResendCountdown();
+      alert("New verification OTP sent (Demo code: 1234)");
+    }
+
+    function backToAuthStep1() {
+      if (authState.resendTimer) clearInterval(authState.resendTimer);
+      document.getElementById('authStep1').style.display = "block";
+      document.getElementById('authStep2').style.display = "none";
+    }
+
+    function handleVerifyOtp(e) {
+      e.preventDefault();
+      const code = document.getElementById('authOtpInput').value.trim();
+      if (code !== "1234") {
+        alert("Invalid OTP code. For this demo, please enter 1234.");
+        return;
+      }
+
+      if (authState.resendTimer) clearInterval(authState.resendTimer);
+
+      isLoggedIn = true;
+      isSignedUp = true;
+
+      if (authState.isSignUp) {
+        const enteredName = document.getElementById('authNameInput').value.trim() || "User";
+        profileData.name = enteredName;
+        if (authState.method === 'phone') {
+          profileData.phone = authState.sentTarget;
+        } else {
+          profileData.email = authState.sentTarget;
+        }
+      } else {
+        // Returning user logging in
+        if (authState.method === 'phone' && (!profileData.phone || profileData.phone.length < 5)) {
+          profileData.phone = authState.sentTarget;
+        } else if (authState.method === 'email' && (!profileData.email || profileData.email.length < 5)) {
+          profileData.email = authState.sentTarget;
+        }
+      }
+
+      saveState();
+      document.getElementById('authModal').classList.remove('show');
+      renderUI();
+      if (currentActiveTab === 'settings') renderSettings();
+    }
+
+    function handleLogout() {
+      if (confirm("Are you sure you want to log out of DayLimit?")) {
+        isLoggedIn = false;
+        saveState();
+        renderSettings();
+        // Immediately present Login screen
+        showAuthModal(false);
+      }
     }
     function handleSaveBudget(e) {
       e.preventDefault();
@@ -2398,6 +2632,9 @@
     // Initialize application and route
     syncTabFromHash();
     renderUI();
+    if (!isLoggedIn) {
+      showAuthModal(!isSignedUp);
+    }
   </script>
 </body>
 </html>
