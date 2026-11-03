@@ -25,6 +25,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Warning
@@ -45,15 +47,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.data.TransactionEntity
 import com.example.data.UserSettings
 import com.example.logic.CurrencyFormatter
 import com.example.model.Category
 import com.example.model.DayLimitCalculation
 import com.example.model.UPIApp
-import com.example.ui.components.AutoUpiSyncCard
 import com.example.ui.components.CategoryBadge
 import com.example.ui.components.CircularProgressRing
 import com.example.ui.components.MonthDaysCalendarCard
@@ -105,7 +108,7 @@ fun HomeScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Quick Add Spend",
+                    contentDescription = "Add Expenses",
                     modifier = Modifier.size(28.dp),
                     tint = Color.Black
                 )
@@ -354,20 +357,6 @@ fun HomeScreen(
                 }
             }
 
-            // UPI Integration Hub: Displayed on Home only when no UPI apps are connected yet.
-            // Once connected, this section disappears from the Home screen and is managed exclusively in Settings.
-            if (userSettings.integratedUpiApps.isEmpty()) {
-                item {
-                    AutoUpiSyncCard(
-                        integratedUpiApps = userSettings.integratedUpiApps,
-                        onAddUpiApp = onAddUpiApp,
-                        onRemoveUpiApp = onRemoveUpiApp,
-                        onSimulateTestPayment = { amount, merchant, upiApp, category ->
-                            onAutoTrackSpend(amount, merchant, upiApp, category)
-                        }
-                    )
-                }
-            }
 
             // Month Days Calendar: Glassmorphism with Green Stroke (within limit) & Red Stroke (excess limit)
             item {
@@ -398,7 +387,7 @@ fun HomeScreen(
                     ) {
                         Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.Black)
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Quick Add", fontWeight = FontWeight.Bold)
+                        Text("Add Expenses", fontWeight = FontWeight.Bold)
                     }
 
                     OutlinedButton(
@@ -461,7 +450,7 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.height(10.dp))
                             Text(
-                                text = "No UPI spends logged today!",
+                                text = "No expenses logged today!",
                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                 color = Color.White
                             )
@@ -528,11 +517,31 @@ fun TransactionItemCard(
                     .border(1.dp, upiApp.primaryColor.copy(alpha = 0.35f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = upiApp.brandTag.take(2).uppercase(),
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = upiApp.primaryColor
-                )
+                when (upiApp) {
+                    UPIApp.MANUAL -> {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_cash),
+                            contentDescription = "Cash Transaction",
+                            tint = upiApp.primaryColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    UPIApp.CARD -> {
+                        Icon(
+                            imageVector = Icons.Default.CreditCard,
+                            contentDescription = "Card Transaction",
+                            tint = upiApp.primaryColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    else -> {
+                        Text(
+                            text = upiApp.brandTag.take(2).uppercase(),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = upiApp.primaryColor
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.width(14.dp))
@@ -547,8 +556,14 @@ fun TransactionItemCard(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    val methodLabel = when (upiApp) {
+                        UPIApp.MANUAL -> "Cash"
+                        UPIApp.CARD -> "Card"
+                        UPIApp.OTHER -> "UPI"
+                        else -> upiApp.displayName
+                    }
                     Text(
-                        text = "${category.displayName} • $timeString",
+                        text = "${category.displayName} • $methodLabel • $timeString",
                         style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFF9CA3AF)
                     )

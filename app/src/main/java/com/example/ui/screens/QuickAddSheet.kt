@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -12,12 +13,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,11 +48,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import com.example.model.Category
 import com.example.model.UPIApp
 import com.example.ui.components.CategoryBadge
 import com.example.ui.components.NumericKeypad
-import com.example.ui.components.UpiBadge
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,9 +65,10 @@ fun QuickAddSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var amountString by remember { mutableStateOf("") }
-    var merchant by remember { mutableStateOf("") }
-    var selectedUpi by remember { mutableStateOf(UPIApp.GPAY) }
+    var merchantNote by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(Category.FOOD) }
+    var isManualMode by remember { mutableStateOf(false) }
+    var selectedUpiApp by remember { mutableStateOf(UPIApp.OTHER) }
 
     val amountValue = amountString.toDoubleOrNull() ?: 0.0
 
@@ -82,11 +92,57 @@ fun QuickAddSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Quick Add Spend",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val iconTint = selectedUpiApp.primaryColor
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(iconTint.copy(alpha = 0.18f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when (selectedUpiApp) {
+                            UPIApp.MANUAL -> {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_cash),
+                                    contentDescription = "Cash Spend",
+                                    tint = iconTint,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            UPIApp.CARD -> {
+                                Icon(
+                                    imageVector = Icons.Default.CreditCard,
+                                    contentDescription = "Card Spend",
+                                    tint = iconTint,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            else -> {
+                                Icon(
+                                    imageVector = Icons.Default.QrCode,
+                                    contentDescription = "UPI Spend",
+                                    tint = iconTint,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = "Add Expenses",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (isManualMode) "Manual Transaction (${selectedUpiApp.displayName})"
+                                   else "UPI Transaction (${selectedUpiApp.displayName})",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFF9CA3AF)
+                        )
+                    }
+                }
                 IconButton(onClick = onDismiss, modifier = Modifier.testTag("quick_add_close")) {
                     Icon(
                         imageVector = Icons.Default.Close,
@@ -162,28 +218,188 @@ fun QuickAddSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // UPI App Selection
+            // Transaction Method Selector (UPI vs Manual: Cash / Card)
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "UPI APP",
+                    text = "TRANSACTION METHOD",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = 1.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(modifier = Modifier.height(6.dp))
+
+                // Primary 2-Way Switcher: UPI vs Manual
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    UPIApp.values().forEach { upi ->
-                        UpiBadge(
-                            upiApp = upi,
-                            isSelected = selectedUpi == upi,
-                            onClick = { selectedUpi = upi }
-                        )
+                    // UPI Tab
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(9.dp))
+                            .background(
+                                if (!isManualMode) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+                                else Color.Transparent
+                            )
+                            .then(
+                                if (!isManualMode) Modifier.border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(9.dp))
+                                else Modifier
+                            )
+                            .clickable {
+                                isManualMode = false
+                                if (selectedUpiApp.isManual) {
+                                    selectedUpiApp = UPIApp.OTHER
+                                }
+                            }
+                            .padding(vertical = 9.dp)
+                            .testTag("quick_add_type_upi"),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.QrCode,
+                                contentDescription = null,
+                                tint = if (!isManualMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "UPI",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (!isManualMode) FontWeight.Bold else FontWeight.Medium
+                                ),
+                                color = if (!isManualMode) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    // Manual Tab (Cash / Card)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(9.dp))
+                            .background(
+                                if (isManualMode) Color(0xFF10B981).copy(alpha = 0.22f)
+                                else Color.Transparent
+                            )
+                            .then(
+                                if (isManualMode) Modifier.border(1.dp, Color(0xFF10B981), RoundedCornerShape(9.dp))
+                                else Modifier
+                            )
+                            .clickable {
+                                isManualMode = true
+                                if (!selectedUpiApp.isManual) {
+                                    selectedUpiApp = UPIApp.MANUAL
+                                }
+                            }
+                            .padding(vertical = 9.dp)
+                            .testTag("quick_add_type_manual"),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_cash),
+                                contentDescription = null,
+                                tint = if (isManualMode) Color(0xFF10B981) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Manual (Cash / Card)",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (isManualMode) FontWeight.Bold else FontWeight.Medium
+                                ),
+                                color = if (isManualMode) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Specific option chips
+                if (!isManualMode) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        listOf(
+                            UPIApp.OTHER to "UPI (General)",
+                            UPIApp.GPAY to "Google Pay",
+                            UPIApp.PHONEPE to "PhonePe",
+                            UPIApp.PAYTM to "Paytm",
+                            UPIApp.BHIM to "BHIM"
+                        ).forEach { (app, label) ->
+                            val isSelected = selectedUpiApp == app
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(
+                                        if (isSelected) app.primaryColor.copy(alpha = 0.22f)
+                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                                    )
+                                    .then(
+                                        if (isSelected) Modifier.border(1.dp, app.primaryColor, RoundedCornerShape(14.dp))
+                                        else Modifier
+                                    )
+                                    .clickable { selectedUpiApp = app }
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = if (isSelected) app.primaryColor else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        listOf(
+                            UPIApp.MANUAL to "💵 Cash Spend",
+                            UPIApp.CARD to "💳 Card / Bank"
+                        ).forEach { (app, label) ->
+                            val isSelected = selectedUpiApp == app
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(
+                                        if (isSelected) app.primaryColor.copy(alpha = 0.22f)
+                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                                    )
+                                    .then(
+                                        if (isSelected) Modifier.border(1.dp, app.primaryColor, RoundedCornerShape(14.dp))
+                                        else Modifier
+                                    )
+                                    .clickable { selectedUpiApp = app }
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = if (isSelected) app.primaryColor else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -216,13 +432,19 @@ fun QuickAddSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Optional Merchant / Note input
+            // Merchant / Note (optional)
             OutlinedTextField(
-                value = merchant,
-                onValueChange = { merchant = it },
-                placeholder = { Text("Merchant or Note (e.g. Swiggy, Chai, Uber)") },
+                value = merchantNote,
+                onValueChange = { merchantNote = it },
+                placeholder = {
+                    Text(
+                        text = "Merchant or note (optional)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -256,12 +478,18 @@ fun QuickAddSheet(
             Button(
                 onClick = {
                     if (amountValue > 0) {
+                        val trimmed = merchantNote.trim()
+                        val merchantName = if (trimmed.isNotBlank()) {
+                            trimmed
+                        } else {
+                            selectedCategory.displayName
+                        }
                         onSave(
                             amountValue,
-                            merchant.ifBlank { selectedCategory.displayName },
-                            selectedUpi,
+                            merchantName,
+                            selectedUpiApp,
                             selectedCategory,
-                            merchant.ifBlank { null }
+                            if (trimmed.isNotBlank()) trimmed else null
                         )
                         onDismiss()
                     }
@@ -277,7 +505,7 @@ fun QuickAddSheet(
                 )
             ) {
                 Text(
-                    text = if (amountValue > 0) "Save ₹$amountString Spend" else "Enter Amount",
+                    text = if (amountValue > 0) "Save ₹$amountString Expense" else "Enter Amount",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
             }

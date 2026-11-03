@@ -730,6 +730,48 @@
     }
     .btn-glass-action:hover { background: rgba(255, 255, 255, 0.14); }
     .btn-glass-action:active { transform: scale(0.97); }
+
+    .tx-type-tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #9CA3AF;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tx-type-tab.active-upi {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: #38BDF8;
+      color: #FFFFFF;
+    }
+    .tx-type-tab.active-manual {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: #10B981;
+      color: #FFFFFF;
+    }
+    .method-chip {
+      padding: 6px 12px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #9CA3AF;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .method-chip.selected {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: #FFFFFF;
+      color: #FFFFFF;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -801,34 +843,16 @@
           </div>
         </div>
 
-        <!-- Quick Actions Bar: Quick Add & Paste SMS -->
+        <!-- Quick Actions Bar: Add Expenses & Paste SMS -->
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
           <button class="btn-submit" style="padding:12px; margin:0;" onclick="openAddModal()">
-            <span>➕</span><span>Quick Add</span>
+            <span>➕</span><span>Add Expenses</span>
           </button>
           <button class="btn-glass-action" style="padding:12px; justify-content:center; font-size:13px;" onclick="openPasteSmsModal()">
             <span>📋</span><span>Paste SMS</span>
           </button>
         </div>
 
-        <!-- UPI Integration Hub: Visible on Home only when NO apps are connected yet. Once connected, disappears from Home and is managed in Settings. -->
-        <div class="glass-card" id="homeUpiCard">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <div style="font-size:15px; font-weight:700;">UPI Integration</div>
-              <div style="font-size:11px; color:#9CA3AF;" id="integratedCountLabel">0 Apps Connected</div>
-            </div>
-            <button class="btn-glass-action" onclick="openIntegrateUpiModal()">Connect UPI</button>
-          </div>
-
-          <p style="font-size:12px; color:#9CA3AF; margin-top:8px;">
-            Connect your UPI apps (GPay, PhonePe, Paytm, etc.) to automatically track spends and rebalance your daily limit.
-          </p>
-
-          <div id="integratedUpiList" style="margin-top:10px;">
-            <!-- Rendered by JS -->
-          </div>
-        </div>
 
         <!-- Today's Transactions -->
         <div class="glass-card">
@@ -864,7 +888,45 @@
       <section class="screen-view" id="insightsView">
         <div>
           <div style="font-size:22px; font-weight:800;">Spend Insights</div>
-          <div style="font-size:12px; color:#9CA3AF;">Weekly patterns and UPI app distribution</div>
+          <div style="font-size:12px; color:#9CA3AF;">Monthly budget utilization and spending patterns</div>
+        </div>
+
+        <!-- Monthly Budget Utilization Card with Visual Progress Bar -->
+        <div class="glass-card" style="padding:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div id="insightBudgetIconBox" style="width:32px; height:32px; border-radius:50%; background:rgba(34,197,94,0.15); display:flex; align-items:center; justify-content:center; font-size:16px;">👛</div>
+              <div>
+                <div style="font-size:11px; font-weight:700; color:#9CA3AF; letter-spacing:0.5px;">MONTHLY BUDGET PROGRESS</div>
+                <div style="font-size:10px; color:#6B7280;" id="insightCycleDaysText">-- days left in cycle</div>
+              </div>
+            </div>
+            <span id="insightBudgetStatusBadge" class="pill-badge" style="background:rgba(34,197,94,0.15); color:#22C55E; border:1px solid rgba(34,197,94,0.3); font-size:11px; font-weight:700;">On Track</span>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:16px;">
+            <div>
+              <div style="font-size:11px; color:#9CA3AF;">Total Spent So Far</div>
+              <div style="display:flex; align-items:baseline; gap:6px; margin-top:2px;">
+                <span style="font-size:24px; font-weight:800; color:#FFFFFF;" id="insightTotalMonthSpent">₹0</span>
+                <span style="font-size:13px; color:#9CA3AF;" id="insightTotalMonthBudget">of ₹30,000</span>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:20px; font-weight:800; color:#22C55E;" id="insightBudgetPctText">0%</div>
+              <div style="font-size:10px; color:#9CA3AF;">Budget Used</div>
+            </div>
+          </div>
+
+          <!-- Visual Progress Bar -->
+          <div style="width:100%; height:12px; border-radius:6px; background:#262636; overflow:hidden; margin-top:12px; position:relative;">
+            <div id="insightBudgetProgressBar" style="height:100%; width:0%; border-radius:6px; background:linear-gradient(90deg, #10B981, #34D399); transition:width 0.4s ease, background 0.3s ease;"></div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:12px;">
+            <span id="insightBudgetRemainingText" style="font-weight:600; color:#22C55E;">₹0 remaining</span>
+            <span id="insightSafePaceText" style="color:#9CA3AF; font-size:11px;">~₹0/day safe pace</span>
+          </div>
         </div>
 
         <!-- Summary Metric Cards -->
@@ -905,20 +967,13 @@
           </div>
         </div>
 
-        <!-- Spend by UPI App -->
-        <div class="glass-card">
-          <div style="font-size:13px; font-weight:700; letter-spacing:0.5px; margin-bottom:12px;">SPEND BY UPI APP</div>
-          <div id="upiBreakdownList" style="display:flex; flex-direction:column; gap:10px;">
-            <!-- Rendered by JS -->
-          </div>
-        </div>
       </section>
 
       <!-- 4. SETTINGS SCREEN VIEW -->
       <section class="screen-view" id="settingsView">
         <div>
           <div style="font-size:22px; font-weight:800;">Settings</div>
-          <div style="font-size:12px; color:#9CA3AF;">Profile, subscription plan, and preferences</div>
+          <div style="font-size:12px; color:#9CA3AF;">Profile, budget configuration, and preferences</div>
         </div>
 
         <!-- 1. Profile & Personal Details Card -->
@@ -966,38 +1021,23 @@
           </div>
         </div>
 
-        <!-- 2. Subscription Plan Card (Below Personal Details) -->
-        <div class="glass-card" style="border-color:rgba(34,197,94,0.45);">
+        <!-- 2. Free Edition Card -->
+        <div class="glass-card" style="border-color:rgba(34,197,94,0.35);">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:10px;">
               <div style="width:36px; height:36px; border-radius:10px; background:rgba(34,197,94,0.15); display:flex; align-items:center; justify-content:center;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#22C55E"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#22C55E"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
               </div>
               <div>
-                <div style="font-size:15px; font-weight:700; color:#FFFFFF;">DayLimit Pro</div>
-                <div style="font-size:11px; color:#9CA3AF;">Subscription Plan</div>
+                <div style="font-size:15px; font-weight:700; color:#FFFFFF;">Free Edition</div>
+                <div style="font-size:11px; color:#9CA3AF;">100% Free to Use</div>
               </div>
             </div>
-            <div style="background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.5); border-radius:20px; padding:3px 10px; font-size:11px; font-weight:800; color:#22C55E;">ACTIVE</div>
+            <div style="background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.5); border-radius:20px; padding:3px 10px; font-size:11px; font-weight:800; color:#22C55E;">FREE</div>
           </div>
-
-          <div style="display:flex; align-items:baseline; gap:4px; margin:14px 0 2px 0;">
-            <span style="font-size:26px; font-weight:900; color:#FFFFFF;">₹99</span>
-            <span style="font-size:13px; color:#9CA3AF;">/ month</span>
+          <div style="font-size:12px; color:#9CA3AF; margin-top:10px; line-height:16px;">
+            All manual expense tracking, smart calendar views, and dynamic rebalancing features are completely free.
           </div>
-
-          <div style="font-size:12px; color:#9CA3AF; margin-bottom:12px;">
-            Subscription plan is Rs 99/- per month. Auto-renews on 29 Nov 2026.
-          </div>
-
-          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px; font-size:12px; color:#D1D5DB;">
-            <div style="display:flex; align-items:center; gap:6px;"><span style="color:#22C55E; font-weight:bold;">✓</span> Automatic UPI spend tracking from connected apps</div>
-            <div style="display:flex; align-items:center; gap:6px;"><span style="color:#22C55E; font-weight:bold;">✓</span> Dynamic daily rebalancing &amp; spillover calculations</div>
-            <div style="display:flex; align-items:center; gap:6px;"><span style="color:#22C55E; font-weight:bold;">✓</span> Visual calendar with overspend alerts</div>
-            <div style="display:flex; align-items:center; gap:6px;"><span style="color:#22C55E; font-weight:bold;">✓</span> 100% private, on-device financial tracking</div>
-          </div>
-
-          <button class="btn-submit" style="width:100%; padding:10px; margin-bottom:0;" onclick="openManageSubModal()">Manage Subscription</button>
         </div>
 
         <!-- Monthly Budget Card -->
@@ -1009,18 +1049,6 @@
             </div>
             <button class="btn-glass-action" onclick="openBudgetModal()">Edit</button>
           </div>
-        </div>
-
-        <!-- Connected UPI Apps Manager Card -->
-        <div class="glass-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <div>
-              <div style="font-size:14px; font-weight:700;">Connected UPI Apps</div>
-              <div style="font-size:11px; color:#9CA3AF;">Connect or disconnect UPI apps</div>
-            </div>
-            <button class="btn-glass-action" onclick="openIntegrateUpiModal()">Connect UPI</button>
-          </div>
-          <div id="settingsUpiList"></div>
         </div>
 
         <!-- Privacy Card -->
@@ -1111,7 +1139,7 @@
   <!-- Quick Add Transaction Modal -->
   <div class="modal-backdrop" id="addTxModal" onclick="closeAddModal()">
     <div class="modal-card" onclick="event.stopPropagation()">
-      <div class="modal-title">Quick Add Spend</div>
+      <div class="modal-title">Add Expenses</div>
       <div class="modal-sub">Log an expense to dynamically rebalance your daily budget</div>
 
       <!-- Quick Preset Chips -->
@@ -1129,11 +1157,32 @@
         <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Amount (₹)</div>
         <input class="input-field" type="number" id="txAmount" placeholder="Amount (e.g. 150)" required autofocus step="any">
 
-        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Merchant / Note</div>
-        <input class="input-field" type="text" id="txMerchant" placeholder="e.g. Chai Point, Groceries, Swiggy" required>
 
-        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">UPI App</div>
-        <select class="input-field" id="txUpiApp"></select>
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:6px;">TRANSACTION METHOD</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+          <button type="button" id="txTypeUpiBtn" class="tx-type-tab active-upi" onclick="setAddTxType('UPI')">
+            <span style="font-size:15px;">📱</span>
+            <span>UPI</span>
+          </button>
+          <button type="button" id="txTypeManualBtn" class="tx-type-tab" onclick="setAddTxType('Manual')">
+            <span style="font-size:15px;">💵</span>
+            <span>Manual (Cash/Card)</span>
+          </button>
+        </div>
+
+        <!-- Sub-selector for specific type -->
+        <div id="txTypeSubSelector" style="margin-bottom:12px;">
+          <div id="upiSubOptions" style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="method-chip selected" data-method="UPI" onclick="selectSubMethod('UPI')">UPI</button>
+            <button type="button" class="method-chip" data-method="Google Pay" onclick="selectSubMethod('Google Pay')">Google Pay</button>
+            <button type="button" class="method-chip" data-method="PhonePe" onclick="selectSubMethod('PhonePe')">PhonePe</button>
+            <button type="button" class="method-chip" data-method="Paytm" onclick="selectSubMethod('Paytm')">Paytm</button>
+          </div>
+          <div id="manualSubOptions" style="display:none; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="method-chip selected" data-method="Cash" onclick="selectSubMethod('Cash')">💵 Cash</button>
+            <button type="button" class="method-chip" data-method="Card" onclick="selectSubMethod('Card')">💳 Card / Bank</button>
+          </div>
+        </div>
 
         <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Category</div>
         <select class="input-field" id="txCategory">
@@ -1146,6 +1195,9 @@
           <option value="Health">💊 Health</option>
           <option value="Other">📦 Other</option>
         </select>
+
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Merchant / Note (optional)</div>
+        <input class="input-field" type="text" id="txMerchantNote" placeholder="e.g. Swiggy, Chai, Uber (optional)">
 
         <button type="submit" class="btn-submit">Save Transaction</button>
         <button type="button" class="btn-close" onclick="closeAddModal()">Cancel</button>
@@ -1163,11 +1215,20 @@
         <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Amount (₹)</div>
         <input class="input-field" type="number" id="editTxAmount" required step="any">
 
-        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Merchant / Note</div>
-        <input class="input-field" type="text" id="editTxMerchant" required>
-
-        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">UPI App</div>
-        <select class="input-field" id="editTxUpiApp"></select>
+        <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Transaction Method</div>
+        <select class="input-field" id="editTxUpiApp">
+          <optgroup label="UPI Transactions">
+            <option value="UPI">📱 UPI (General)</option>
+            <option value="Google Pay">📱 Google Pay</option>
+            <option value="PhonePe">📱 PhonePe</option>
+            <option value="Paytm">📱 Paytm</option>
+            <option value="BHIM">📱 BHIM</option>
+          </optgroup>
+          <optgroup label="Manual Transactions">
+            <option value="Cash">💵 Cash Spend</option>
+            <option value="Card">💳 Card / Bank</option>
+          </optgroup>
+        </select>
 
         <div style="font-size:11px; color:#9CA3AF; margin-bottom:4px;">Category</div>
         <select class="input-field" id="editTxCategory">
@@ -1569,17 +1630,28 @@
       document.getElementById('txCountBadge').innerText = `${todayTxs.length} logged`;
 
       if (todayTxs.length === 0) {
-        txList.innerHTML = `<div style="text-align:center; padding:16px 0; color:#8E8E9B; font-size:13px;">No spends logged today. Tap Quick Add or + to add one!</div>`;
+        txList.innerHTML = `<div style="text-align:center; padding:16px 0; color:#8E8E9B; font-size:13px;">No spends logged today. Tap Add Expenses or + to add one!</div>`;
         return;
       }
 
-      txList.innerHTML = todayTxs.map(t => `
+      txList.innerHTML = todayTxs.map(t => {
+        const isCash = t.upiApp === 'Manual' || t.upiApp === 'Cash';
+        const isCard = t.upiApp === 'Card';
+        const badgeStyle = isCash 
+          ? 'background:rgba(16,185,129,0.18); color:#34D399; border:1px solid rgba(16,185,129,0.35);' 
+          : isCard 
+          ? 'background:rgba(168,85,247,0.18); color:#C084FC; border:1px solid rgba(168,85,247,0.35);' 
+          : 'background:rgba(56,189,248,0.18); color:#38BDF8; border:1px solid rgba(56,189,248,0.35);';
+        const badgeIcon = isCash ? '💵' : isCard ? '💳' : (t.upiApp === 'Google Pay' ? 'GP' : t.upiApp === 'PhonePe' ? 'PH' : t.upiApp === 'Paytm' ? 'PA' : 'UPI');
+        const methodText = isCash ? 'Cash' : isCard ? 'Card' : (t.upiApp || 'UPI');
+
+        return `
         <div class="tx-item" onclick="openEditTxModal(${t.id})">
           <div class="tx-left">
-            <div class="tx-badge">${(t.upiApp || 'UPI').slice(0, 2).toUpperCase()}</div>
+            <div class="tx-badge" style="${badgeStyle}">${badgeIcon}</div>
             <div>
               <div class="tx-merchant">${t.merchant}</div>
-              <div class="tx-time">${t.time || ''} • ${t.upiApp || 'UPI'} • ${t.category || 'General'}</div>
+              <div class="tx-time">${t.time || ''} • ${methodText} • ${t.category || 'General'}</div>
             </div>
           </div>
           <div style="text-align:right;">
@@ -1587,7 +1659,8 @@
             <div style="font-size:10px; color:#9CA3AF;">Edit ✎</div>
           </div>
         </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     // 2. Render History Page
@@ -1597,12 +1670,12 @@
       const calc = getCalculation();
 
       // Filters
-      const upiOptions = ["All", ...new Set([...integratedUpiApps, "Google Pay", "PhonePe", "Paytm", "Other"])];
+      const upiOptions = ["All", ...new Set([...integratedUpiApps, "Google Pay", "PhonePe", "Paytm", "Manual", "Other"])];
       filterRow.innerHTML = upiOptions.map(app => {
         const isSelected = (app === "All" && currentSelectedFilter === null) || (currentSelectedFilter === app);
         return `
           <button class="btn-glass-action" style="${isSelected ? 'background:#FFFFFF; color:#000000; font-weight:700;' : ''}" onclick="setHistoryFilter('${app}')">
-            ${app}
+            ${app === 'Manual' ? '💵 Cash' : app}
           </button>
         `;
       }).join('');
@@ -1644,7 +1717,7 @@
                 ${dayTxs.map(t => `
                   <div class="tx-item" style="padding:8px 10px; margin-bottom:4px;" onclick="openEditTxModal(${t.id})">
                     <div style="display:flex; align-items:center; gap:8px;">
-                      <span style="font-size:11px; padding:2px 6px; background:rgba(255,255,255,0.08); border-radius:6px;">${t.upiApp || 'UPI'}</span>
+                      <span style="font-size:11px; padding:2px 6px; background:${t.upiApp === 'Manual' ? 'rgba(16,185,129,0.2); color:#34D399;' : 'rgba(255,255,255,0.08);'} border-radius:6px;">${t.upiApp === 'Manual' ? '💵 Cash' : (t.upiApp || 'UPI')}</span>
                       <span style="color:#D1D5DB; font-size:12px;">${t.merchant}</span>
                     </div>
                     <span style="font-weight:700; font-size:13px;">₹${t.amount}</span>
@@ -1668,6 +1741,66 @@
       const totalMonthSpent = transactions.reduce((s, t) => s + t.amount, 0);
       const daysCounted = Math.max(1, currentDay);
       const avgDaily = totalMonthSpent / daysCounted;
+
+      // Monthly Budget Progress Bar calculation
+      const budget = Math.max(1, calc.monthlyBudget);
+      const pct = (totalMonthSpent / budget) * 100;
+      const pctClamped = Math.min(100, pct);
+      const isOver = totalMonthSpent > budget;
+      const remainingMonth = Math.max(0, budget - totalMonthSpent);
+      const daysLeft = calc.daysRemaining;
+
+      document.getElementById('insightTotalMonthSpent').innerText = `₹${Math.round(totalMonthSpent).toLocaleString('en-IN')}`;
+      document.getElementById('insightTotalMonthBudget').innerText = `of ₹${Math.round(budget).toLocaleString('en-IN')}`;
+      document.getElementById('insightBudgetPctText').innerText = `${Math.round(pct)}%`;
+      document.getElementById('insightCycleDaysText').innerText = `${daysLeft} days left in cycle`;
+
+      const progressBar = document.getElementById('insightBudgetProgressBar');
+      const statusBadge = document.getElementById('insightBudgetStatusBadge');
+      const iconBox = document.getElementById('insightBudgetIconBox');
+      const remText = document.getElementById('insightBudgetRemainingText');
+      const pctText = document.getElementById('insightBudgetPctText');
+      const safePaceText = document.getElementById('insightSafePaceText');
+
+      progressBar.style.width = `${pctClamped}%`;
+
+      if (isOver) {
+        const overAmt = totalMonthSpent - budget;
+        statusBadge.innerText = 'Budget Exceeded';
+        statusBadge.style.background = 'rgba(239,68,68,0.18)';
+        statusBadge.style.color = '#EF4444';
+        statusBadge.style.borderColor = 'rgba(239,68,68,0.3)';
+        iconBox.style.background = 'rgba(239,68,68,0.18)';
+        progressBar.style.background = 'linear-gradient(90deg, #EF4444, #F87171)';
+        pctText.style.color = '#EF4444';
+        remText.innerText = `Over budget by ₹${Math.round(overAmt).toLocaleString('en-IN')}`;
+        remText.style.color = '#EF4444';
+        safePaceText.innerText = 'Limit reached';
+      } else if (pct >= 80) {
+        statusBadge.innerText = 'Nearing Limit';
+        statusBadge.style.background = 'rgba(245,158,11,0.18)';
+        statusBadge.style.color = '#F59E0B';
+        statusBadge.style.borderColor = 'rgba(245,158,11,0.3)';
+        iconBox.style.background = 'rgba(245,158,11,0.18)';
+        progressBar.style.background = 'linear-gradient(90deg, #F59E0B, #FBBF24)';
+        pctText.style.color = '#F59E0B';
+        remText.innerText = `₹${Math.round(remainingMonth).toLocaleString('en-IN')} remaining`;
+        remText.style.color = '#F59E0B';
+        const safePace = daysLeft > 0 ? Math.round(remainingMonth / daysLeft) : 0;
+        safePaceText.innerText = `~₹${safePace}/day safe pace`;
+      } else {
+        statusBadge.innerText = 'On Track';
+        statusBadge.style.background = 'rgba(34,197,94,0.18)';
+        statusBadge.style.color = '#22C55E';
+        statusBadge.style.borderColor = 'rgba(34,197,94,0.3)';
+        iconBox.style.background = 'rgba(34,197,94,0.18)';
+        progressBar.style.background = 'linear-gradient(90deg, #10B981, #34D399)';
+        pctText.style.color = '#22C55E';
+        remText.innerText = `₹${Math.round(remainingMonth).toLocaleString('en-IN')} remaining`;
+        remText.style.color = '#22C55E';
+        const safePace = daysLeft > 0 ? Math.round(remainingMonth / daysLeft) : 0;
+        safePaceText.innerText = `~₹${safePace}/day safe pace`;
+      }
 
       document.getElementById('insightAvgDaily').innerText = `₹${Math.round(avgDaily)}`;
       document.getElementById('insightBaseline').innerText = `₹${Math.round(calc.monthlyBudget / totalDaysInMonth)}`;
@@ -1771,12 +1904,57 @@
       }
     }
 
+    // Transaction Mode & Sub-method for Add Expenses
+    let currentTxType = 'UPI'; // 'UPI' or 'Manual'
+    let currentSubMethod = 'UPI'; // 'UPI', 'Google Pay', 'PhonePe', 'Paytm', 'Cash', 'Card'
+
+    function setAddTxType(type) {
+      currentTxType = type;
+      const upiBtn = document.getElementById('txTypeUpiBtn');
+      const manualBtn = document.getElementById('txTypeManualBtn');
+      const upiSub = document.getElementById('upiSubOptions');
+      const manualSub = document.getElementById('manualSubOptions');
+
+      if (!upiBtn || !manualBtn) return;
+
+      if (type === 'UPI') {
+        upiBtn.classList.add('active-upi');
+        manualBtn.classList.remove('active-manual');
+        if (upiSub) upiSub.style.display = 'flex';
+        if (manualSub) manualSub.style.display = 'none';
+        currentSubMethod = 'UPI';
+      } else {
+        manualBtn.classList.add('active-manual');
+        upiBtn.classList.remove('active-upi');
+        if (manualSub) manualSub.style.display = 'flex';
+        if (upiSub) upiSub.style.display = 'none';
+        currentSubMethod = 'Cash';
+      }
+      updateSubMethodUI();
+    }
+
+    function selectSubMethod(method) {
+      currentSubMethod = method;
+      updateSubMethodUI();
+    }
+
+    function updateSubMethodUI() {
+      document.querySelectorAll('#txTypeSubSelector .method-chip').forEach(chip => {
+        if (chip.getAttribute('data-method') === currentSubMethod) {
+          chip.classList.add('selected');
+        } else {
+          chip.classList.remove('selected');
+        }
+      });
+    }
+
     // Modal Triggers: Add Spend
     function openAddModal() {
-      const select = document.getElementById('txUpiApp');
-      const appOptions = integratedUpiApps.length > 0 ? integratedUpiApps : AVAILABLE_UPI_APPS.map(a => a.name);
-      select.innerHTML = appOptions.map(a => `<option value="${a}">${a}</option>`).join('') + `<option value="Other">Other UPI</option>`;
-      
+      setAddTxType('UPI');
+      selectSubMethod('UPI');
+      if (document.getElementById('txMerchantNote')) {
+        document.getElementById('txMerchantNote').value = '';
+      }
       document.getElementById('addTxModal').classList.add('show');
       document.getElementById('txAmount').focus();
     }
@@ -1784,9 +1962,14 @@
       document.getElementById('addTxModal').classList.remove('show');
     }
 
+    let presetMerchant = '';
+
     function applyPreset(amt, merchant, cat) {
       document.getElementById('txAmount').value = amt;
-      document.getElementById('txMerchant').value = merchant;
+      presetMerchant = merchant || '';
+      if (document.getElementById('txMerchantNote')) {
+        document.getElementById('txMerchantNote').value = merchant || '';
+      }
       if (document.getElementById('txCategory')) {
         document.getElementById('txCategory').value = cat;
       }
@@ -1795,9 +1978,11 @@
     function handleSaveTx(e) {
       e.preventDefault();
       const amount = parseFloat(document.getElementById('txAmount').value);
-      const merchant = document.getElementById('txMerchant').value.trim();
-      const upiApp = document.getElementById('txUpiApp').value;
+      const noteInput = document.getElementById('txMerchantNote');
+      const note = noteInput ? noteInput.value.trim() : '';
+      const upiApp = currentSubMethod || 'UPI';
       const category = document.getElementById('txCategory').value;
+      const merchant = note || presetMerchant || (currentTxType === 'Manual' ? `${upiApp} Spend` : category);
 
       if (!amount || amount <= 0) return;
 
@@ -1814,8 +1999,9 @@
       });
 
       saveState();
+      presetMerchant = '';
       document.getElementById('txAmount').value = '';
-      document.getElementById('txMerchant').value = '';
+      if (noteInput) noteInput.value = '';
       closeAddModal();
       renderUI();
       if (currentActiveTab === 'history') renderHistory();
@@ -1832,8 +2018,9 @@
       document.getElementById('editTxMerchant').value = tx.merchant;
 
       const select = document.getElementById('editTxUpiApp');
-      const appOptions = integratedUpiApps.length > 0 ? integratedUpiApps : AVAILABLE_UPI_APPS.map(a => a.name);
-      select.innerHTML = [...new Set([...appOptions, tx.upiApp, "Other"])].map(a => `<option value="${a}" ${a === tx.upiApp ? 'selected' : ''}>${a}</option>`).join('');
+      if (select) {
+        select.value = tx.upiApp || 'UPI';
+      }
 
       if (document.getElementById('editTxCategory')) {
         document.getElementById('editTxCategory').value = tx.category || 'Food & Dining';

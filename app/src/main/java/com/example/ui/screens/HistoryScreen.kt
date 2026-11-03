@@ -49,7 +49,6 @@ import com.example.data.TransactionEntity
 import com.example.logic.CurrencyFormatter
 import com.example.model.DayLimitCalculation
 import com.example.model.UPIApp
-import com.example.ui.components.UpiBadge
 import com.example.ui.theme.GlassBorderGradient
 import com.example.ui.theme.GlassCardBackground
 import com.example.ui.theme.SpendGreen
@@ -84,49 +83,7 @@ fun HistoryScreen(
             color = MaterialTheme.colorScheme.onBackground
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        // UPI App Filters row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // "All" filter chip
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(
-                        if (selectedUpiFilter == null) Color.White.copy(alpha = 0.92f)
-                        else Color(0xFF1E1E28).copy(alpha = 0.85f)
-                    )
-                    .clickable { onFilterChange(null) }
-                    .padding(horizontal = 14.dp, vertical = 7.dp)
-                    .testTag("filter_all")
-            ) {
-                Text(
-                    text = "All Apps",
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = if (selectedUpiFilter == null) Color.Black
-                    else Color(0xFFB0B0BD)
-                )
-            }
-
-            UPIApp.values().forEach { upi ->
-                UpiBadge(
-                    upiApp = upi,
-                    isSelected = selectedUpiFilter == upi,
-                    onClick = {
-                        if (selectedUpiFilter == upi) onFilterChange(null)
-                        else onFilterChange(upi)
-                    }
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

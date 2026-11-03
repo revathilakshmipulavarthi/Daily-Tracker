@@ -322,7 +322,7 @@ fun DayLimitApp(viewModel: DayLimitViewModel) {
         }
     }
 
-    // Modal: Quick Add Sheet
+    // Modal: Add Expenses Sheet
     if (showQuickAddSheet) {
         QuickAddSheet(
             onDismiss = { showQuickAddSheet = false },

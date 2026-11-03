@@ -72,7 +72,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.UserSettings
 import com.example.logic.CurrencyFormatter
-import com.example.ui.components.AutoUpiSyncCard
 import com.example.ui.theme.GlassBorderGradient
 import com.example.ui.theme.GlassCardBackground
 import com.example.ui.theme.SpendRed
@@ -100,7 +99,6 @@ fun SettingsScreen(
     var showResetAllDialog by remember { mutableStateOf(false) }
     var showEditProfileDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
-    var showManageSubDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -314,10 +312,10 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         // ==========================================
-        // 2. SUBSCRIPTION PLAN CARD (BELOW PERSONAL DETAILS)
+        // 2. FREE & UNLIMITED USAGE BADGE
         // ==========================================
         Text(
-            text = "SUBSCRIPTION PLAN",
+            text = "PLAN & LICENSING",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
@@ -329,156 +327,60 @@ fun SettingsScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag("subscription_card"),
-            shape = RoundedCornerShape(24.dp),
+                .testTag("free_plan_card"),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = GlassCardBackground),
-            border = BorderStroke(1.dp, WithinLimitGreenStroke.copy(alpha = 0.45f)),
+            border = BorderStroke(1.dp, WithinLimitGreenStroke.copy(alpha = 0.35f)),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF142B1C)),
+                    contentAlignment = Alignment.Center
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = WithinLimitGreenStroke,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Free Edition",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
-                                .size(40.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF1A2A20)),
-                            contentAlignment = Alignment.Center
+                                .background(WithinLimitGreenStroke.copy(alpha = 0.15f))
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = null,
-                                tint = WithinLimitGreenStroke,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
                             Text(
-                                text = "DayLimit Pro",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = Color.White
-                            )
-                            Text(
-                                text = "Subscription Plan",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF9CA3AF)
+                                text = "100% FREE",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = WithinLimitGreenStroke
                             )
                         }
                     }
-
-                    // Active badge
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Color(0xFF142B1C))
-                            .border(1.dp, WithinLimitGreenStroke.copy(alpha = 0.6f), RoundedCornerShape(20.dp))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "ACTIVE",
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = WithinLimitGreenStroke
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Price display: Rs 99/- per month
-                Row(
-                    verticalAlignment = Alignment.Bottom
-                ) {
                     Text(
-                        text = "₹99",
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = Color.White
+                        text = "All manual expense tracking & daily rebalancing features are free.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFF9CA3AF)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "/ month",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = Color(0xFF9CA3AF),
-                        modifier = Modifier.padding(bottom = 3.dp)
-                    )
-                }
-
-                Text(
-                    text = "Subscription plan is Rs 99/- per month. Auto-renews on 29 Nov 2026.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF9CA3AF),
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // Plan Features
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf(
-                        "Automatic UPI spend tracking from connected apps",
-                        "Dynamic daily rebalancing & spillover calculations",
-                        "Visual calendar with overspend alerts",
-                        "100% private, on-device financial tracking"
-                    ).forEach { feature ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = WithinLimitGreenStroke,
-                                modifier = Modifier.size(15.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = feature,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFFD1D5DB)
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = { showManageSubDialog = true },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(44.dp)
-                        .testTag("manage_subscription_button"),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
-                    )
-                ) {
-                    Text("Manage Subscription", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Section: Automatic UPI Tracking
-        Text(
-            text = "AUTOMATIC UPI TRACKING",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.sp
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        AutoUpiSyncCard(
-            integratedUpiApps = settings.integratedUpiApps,
-            onAddUpiApp = onAddUpiApp,
-            onRemoveUpiApp = onRemoveUpiApp,
-            onSimulateTestPayment = { _, _, _, _ -> }
-        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -1063,7 +965,7 @@ fun SettingsScreen(
             },
             text = {
                 Text(
-                    text = "Are you sure you want to log out? Your local data and UPI configurations will remain safe on your device.",
+                    text = "Are you sure you want to log out? Your local data will remain safe on your device.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFFD1D5DB)
                 )
@@ -1083,72 +985,6 @@ fun SettingsScreen(
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
                     Text("Cancel", color = Color(0xFF9CA3AF))
-                }
-            }
-        )
-    }
-
-    // Dialog: Manage Subscription Details
-    if (showManageSubDialog) {
-        AlertDialog(
-            onDismissRequest = { showManageSubDialog = false },
-            containerColor = Color(0xFF14141C),
-            shape = RoundedCornerShape(24.dp),
-            title = {
-                Text(
-                    text = "Subscription Plan Details",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White
-                )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        text = "DayLimit is a subscription-based financial tracker. Your current plan details are below:",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF9CA3AF)
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFF1E2620))
-                            .border(1.dp, WithinLimitGreenStroke.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
-                            .padding(14.dp)
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(
-                                text = "DayLimit Pro Plan",
-                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                color = Color.White
-                            )
-                            Text(
-                                text = "Price: ₹99 / month (Rs 99/- per month)",
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = WithinLimitGreenStroke
-                            )
-                            Text(
-                                text = "Status: Active • Renews on 29 Nov 2026",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFFD1D5DB)
-                            )
-                            Text(
-                                text = "Billed via: UPI AutoPay",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF9CA3AF)
-                            )
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = { showManageSubDialog = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Done", fontWeight = FontWeight.Bold)
                 }
             }
         )
